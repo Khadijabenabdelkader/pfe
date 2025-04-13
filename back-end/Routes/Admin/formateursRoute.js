@@ -1,0 +1,43 @@
+const express = require('express');
+const path = require('path');
+const multer = require('multer');
+
+const {
+  getFormateurs,
+  getFormateurById,
+  addFormateur,
+  updateFormateur,
+  deleteFormateur,
+  extractPDF,
+  getDomaineThemes
+} = require('../../Controllers/Admin/formateursAdminController');
+
+const router = express.Router();
+
+// Configuration de multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../..', 'uploads'));  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  },
+});
+
+const uploads = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limite de 10MB par fichier
+}).fields([
+  { name: "cv", maxCount: 1 },         // 1 seul CV
+  { name: "fichePrg", maxCount: 10 }, 
+  { name: "coursSession", maxCount: 10 }
+]);
+
+router.post('/formateurs', uploads, addFormateur);
+
+router.get('/formateurs', getFormateurs);
+router.get('/formateurs/:id', getFormateurById);
+router.put('/formateurs/:id', uploads, updateFormateur);
+router.delete('/formateurs/:id', deleteFormateur);
+router.post('/formateurs/extract-pdf-content',extractPDF);
+router.get('/domaine-themes',getDomaineThemes)
+module.exports = router;

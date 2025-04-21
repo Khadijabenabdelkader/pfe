@@ -77,7 +77,8 @@ const ClientsEntreprise = () => {
 
   return (
     <div className="dark:border-strokedark container mx-auto p-6 mt-10">
-      <h1 className="text-3xl font-semibold mb-5">Nos Entreprises</h1>
+                  <h1 className="text-2xl font-bold text-teal-700 text-center flex-grow">Nos Entreprises</h1>
+
       <input
         type="text"
         placeholder="Rechercher une entreprise ou un participant..."

@@ -1,0 +1,264 @@
+import React, { useEffect, useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import axios from "axios";
+
+// Définition des types
+interface FormateurWithRank {
+  id_formateur: number;
+  nom_complet: string;
+  rang: number;
+}
+
+interface ThemeData {
+  name: string;
+  code: string;
+  formateurs: FormateurWithRank[];
+}
+
+interface AddFormationProps {
+  onFormationAdded: () => void;
+  onClose: () => void;
+  selectedDomain: { domaine: string } | null;
+  domaineFromButton: string | null;
+}
+
+interface DomaineData {
+  domaineName: string;
+  themes: ThemeData[];
+}
+
+interface Formateur {
+  id_formateur: number;
+  nom_complet: string;
+}
+
+const AddTheme: React.FC<AddFormationProps> = ({ 
+  onClose, 
+  onFormationAdded, 
+  selectedDomain,
+  domaineFromButton 
+}) => {
+  // Use the domain from button or from selectedDomain, ensuring we always have the correct value
+  const currentDomaine = domaineFromButton || selectedDomain?.domaine || '';
+  
+  const { register, handleSubmit, reset, control, setValue } = useForm<DomaineData>({
+    defaultValues: {
+      domaineName: currentDomaine,
+      themes: [{ name: "", code: "", formateurs: [] }],
+    },
+  });
+
+  const { fields: themeFields, append: appendTheme } = useFieldArray({
+    control,
+    name: "themes",
+  });
+
+  // Update form when domain changes
+  useEffect(() => {
+    setValue("domaineName", currentDomaine);
+  }, [currentDomaine, setValue]);
+
+  const [formateurs, setFormateurs] = useState<Formateur[]>([]);
+  const [selectedFormateurs, setSelectedFormateurs] = useState<Record<string, FormateurWithRank[]>>({});
+
+  useEffect(() => {
+    // Récupérer les formateurs
+    axios.get(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/formateurs`)
+      .then(response => {
+        setFormateurs(response.data);
+      })
+      .catch(error => console.error("Erreur lors de la récupération des formateurs :", error));
+  }, []);
+
+  const handleAddFormateur = (themeIndex: number, formateurId: number) => {
+    const formateur = formateurs.find(f => f.id_formateur === formateurId);
+    if (!formateur) return;
+
+    setSelectedFormateurs(prev => {
+      const themeKey = `theme_${themeIndex}`;
+      const currentFormateurs = prev[themeKey] || [];
+      
+      if (currentFormateurs.some(f => f.id_formateur === formateurId)) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [themeKey]: [...currentFormateurs, { ...formateur, rang: 0 }]
+      };
+    });
+  };
+
+  const handleRemoveFormateur = (themeIndex: number, formateurId: number) => {
+    setSelectedFormateurs(prev => {
+      const themeKey = `theme_${themeIndex}`;
+      if (!prev[themeKey]) return prev;
+
+      return {
+        ...prev,
+        [themeKey]: prev[themeKey].filter(f => f.id_formateur !== formateurId)
+      };
+    });
+  };
+
+  const handleRankChange = (themeIndex: number, formateurId: number, value: string) => {
+    const rang = parseInt(value) || 0;
+    
+    setSelectedFormateurs(prev => {
+      const themeKey = `theme_${themeIndex}`;
+      if (!prev[themeKey]) return prev;
+
+      return {
+        ...prev,
+        [themeKey]: prev[themeKey].map(f => 
+          f.id_formateur === formateurId ? { ...f, rang } : f
+        )
+      };
+    });
+  };
+
+  const onSubmit = async (data: DomaineData) => {
+    try {
+      const finalData = {
+        ...data,
+        themes: data.themes.map((theme, index) => ({
+          ...theme,
+          formateurs: selectedFormateurs[`theme_${index}`] || []
+        }))
+      };
+
+      console.log("Données envoyées:", finalData);
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_APP_API_URL}/apiAdmin/catalogue/addThemesToDomain`,
+        finalData
+      );
+
+      if (response.status !== 201 && response.status !== 200) {
+        throw new Error("Erreur lors de l'ajout des thèmes");
+      }
+
+      onFormationAdded();
+      reset();
+      setSelectedFormateurs({});
+      alert("Thèmes ajoutés avec succès au domaine !");
+    } catch (error) {
+      console.error("Erreur lors de l'ajout :", error);
+      alert("Une erreur est survenue lors de l'ajout des thèmes");
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 p-4">
+      <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-screen overflow-y-auto">
+        <h2 className="text-2xl font-bold mb-4">Ajouter des thèmes au domaine</h2>
+        <h3 className="text-xl font-semibold mb-2">
+          Domaine: {currentDomaine || "Aucun domaine sélectionné"}
+        </h3>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <input type="hidden" {...register("domaineName")} />
+
+          <h3 className="text-xl font-semibold mb-2">Thèmes :</h3>
+          
+          {themeFields.map((theme, themeIndex) => (
+            <div key={theme.id} className="border p-4 rounded-lg bg-gray-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label>Nom du Thème :</label>
+                  <input
+                    className="w-full p-2 border rounded"
+                    {...register(`themes.${themeIndex}.name`, { required: true })}
+                  />
+                </div>
+                
+              </div>
+
+              <div className="mb-4">
+                <label>Ajouter un formateur :</label>
+                <div className="flex gap-2">
+                  <select
+                    className="flex-1 p-2 border rounded"
+                    onChange={(e) => {
+                      const formateurId = parseInt(e.target.value);
+                      if (formateurId) {
+                        handleAddFormateur(themeIndex, formateurId);
+                        e.target.value = "";
+                      }
+                    }}
+                  >
+                    <option value="">Sélectionnez un formateur</option>
+                    {formateurs
+                      .filter(f => !selectedFormateurs[`theme_${themeIndex}`]?.some(sf => sf.id_formateur === f.id_formateur))
+                      .map(formateur => (
+                        <option key={formateur.id_formateur} value={formateur.id_formateur}>
+                          {formateur.nom_complet}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium">Formateurs sélectionnés :</h4>
+                {selectedFormateurs[`theme_${themeIndex}`]?.length > 0 ? (
+                  selectedFormateurs[`theme_${themeIndex}`]?.map(formateur => (
+                    <div key={formateur.id_formateur} className="flex items-center gap-3 p-2 bg-white border rounded">
+                      <span className="flex-1">{formateur.nom_complet}</span>
+                      <input
+                        type="number"
+                        min="1"
+                        placeholder="Rang"
+                        className="w-20 p-1 border rounded"
+                        value={formateur.rang || ""}
+                        onChange={(e) => handleRankChange(themeIndex, formateur.id_formateur, e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => handleRemoveFormateur(themeIndex, formateur.id_formateur)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-gray-500 italic">Aucun formateur sélectionné</div>
+                )}
+              </div>
+            </div>
+          ))}
+
+          <div className="flex justify-between">
+            <button
+              type="button"
+              className="bg-teal-500 text-white px-4 py-2 rounded"
+              onClick={() => appendTheme({ name: "", code: "", formateurs: [] })}
+            >
+              Ajouter un thème
+            </button>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <button 
+              type="button" 
+              className="bg-gray-400 text-white px-4 py-2 rounded" 
+              onClick={onClose}
+            >
+              Annuler
+            </button>
+            <button 
+              type="submit" 
+              className="bg-teal-600 text-white px-4 py-2 rounded hover:bg-teal-700"
+              disabled={!currentDomaine}
+            >
+              Enregistrer les thèmes
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default AddTheme;

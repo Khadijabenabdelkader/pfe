@@ -95,15 +95,15 @@ const getHistoriqueFormations = (req, res) => {
           s.date_fin, 
           s.etat, 
           s.type_session, 
-          fp.chemin AS fiche_prg,  -- Récupère le chemin de la fiche du formateur
-          a.id_avis,             -- ID de l'avis
-          a.fichier_pdf AS avis_pdf,  -- Chemin du fichier PDF de l'avis
-          a.date_creation AS date_avis  -- Date de création de l'avis
+          fp.chemin AS fiche_prg,  
+          a.id_avis,            
+          a.fichier_pdf AS avis_pdf,  
+          a.date_creation AS date_avis  
       FROM session s
       JOIN formation f ON s.id_formation = f.id_formation
       JOIN formateur frm ON s.id_formateur = frm.id_formateur
-      LEFT JOIN fiche_prg fp ON frm.id_formateur = fp.id_formateur  -- Jointure sur fiche_prg
-      LEFT JOIN avis a ON s.id_session = a.id_session  -- Jointure sur avis
+      LEFT JOIN fiche_prg fp ON frm.id_formateur = fp.id_formateur  
+      LEFT JOIN avis a ON s.id_session = a.id_session  
       WHERE s.etat = 'déjà réalisé' 
         AND frm.id_formateur = ?;`;
 

@@ -1,141 +1,5 @@
 
-{/*
-import React, { useEffect, useState } from "react";
-
-import { useForm, useFieldArray } from "react-hook-form";
-import axios from "axios";
-
-// Définition des types
-interface ThemeData {
-  name: string;
-  code: string;
-  formateurs: Formateur[];
-}
-interface AddFormationProps {
-    onFormationAdded: () => void;
-    onClose: () => void;
-  }
-  
-interface DomaineData {
-  domaineName: string;
-  abbreviation: string;
-  themes: ThemeData[];
-}
-interface Formateur {
-  id_formateur: number;
-  nom_complet: string;
-}
-
-const AddDomaine: React.FC<AddFormationProps> = ({ onClose, onFormationAdded }) => {
-  const { register, handleSubmit,reset, control, setValue, watch } = useForm<DomaineData>({
-    defaultValues: {
-      domaineName: "",
-      abbreviation: "",
-      themes: [{ name: "", code: "" }],
-    },
-  });
-
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "themes",
-  });
-
-  const abbreviation = watch("abbreviation");
-  const [formateurs, setFormateurs] = useState<Formateur[]>([]);
-
-  const generateThemeCode = (index: number) => {
-    const themeCode = `${abbreviation}${index + 1}`;
-    setValue(`themes.${index}.code`, themeCode);
-  };
-  useEffect(() => {
-    axios.get(`${import.meta.env.VITE_APP_API_URL}/api/formateurs`)
-      .then(response => {
-        setFormateurs(response.data);
-      })
-      .catch(error => console.error("❌ Erreur lors de la récupération des formateurs :", error));
-      
-     }, []);
-
-  const onSubmit = async (data: DomaineData) => {
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_APP_API_URL}/api/formations/addDomain`,
-        data
-      );
-
-      console.log("Réponse du backend:", response.data); // Log pour déboguer
-
-      if (response.status !== 201 && response.status !== 200) {
-        throw new Error("Erreur lors de la création du domaine");
-      }
-      onFormationAdded();
-      reset();
-      alert("Domaine et thèmes créés avec succès !");
-    } catch (error) {
-      console.error("🚨 Erreur lors de la création :", axios.isAxiosError(error) ? error.response?.data || error.message : error);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 p-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg w-1/2 sm:max-w-lg max-h-screen overflow-y-auto">
-        <br/><br/><br/><br/><br/>
-        <h2 className="text-2xl font-bold mb-4">Ajouter un Domaine</h2>
-
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <label className="block mb-2">Nom du Domaine :</label>
-          <input className="w-full p-2 border rounded mb-4" {...register("domaineName", { required: true })} />
-
-          <label className="block mb-2">code commance par :</label>
-          <input className="w-full p-2 border rounded mb-4" {...register("abbreviation", { required: true })} />
-
-          <h3 className="text-xl font-semibold mb-2">Thèmes :</h3>
-          {fields.map((item, index) => (
-            <div key={item.id} className="border p-3 mb-3 rounded bg-gray-100">
-              <label>Thème :</label>
-              <input
-                className="w-full p-2 border rounded mb-2"
-                {...register(`themes.${index}.name`, { required: true })}
-                onBlur={() => generateThemeCode(index)}
-              />
-              <label>Code du Thème :</label>
-              <input
-                className="w-full p-2 border rounded mb-2"
-                {...register(`themes.${index}.code`)}
-                readOnly
-              />
-              
-              
-              <label>Formateur :</label>
-<select className="w-full p-2 border rounded mb-2" { ...{ required: true }}>
-  <option value="">Sélectionnez un formateur</option>
-  {formateurs.map((formateur) => (
-    <option key={formateur.id_formateur} value={formateur.id_formateur}>
-      {formateur.nom_complet}
-    </option>
-  ))}
-</select>
-
-
- </div>
-          ))}
-          <div className="flex justify-end">
-            <button type="submit" className="bg-teal-600 text-white p-2 rounded">
-              Ajouter Domaine
-            </button>
-            <button type="button" className="bg-gray-500 text-white p-2 rounded mr-2" onClick={onClose}>
-              Annuler
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-};
-
-export default AddDomaine;
-*/}
-
+//
 import React, { useEffect, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import axios from "axios";
@@ -269,10 +133,7 @@ const AddDomaine: React.FC<AddFormationProps> = ({ onClose, onFormationAdded }) 
         throw new Error("Erreur lors de la création du domaine");
       }
 
-       {/* // Vérifier si onFormationAdded existe avant de l'appeler
-    if (typeof onFormationAdded === 'function') {
-      onFormationAdded();
-    }*/}
+     
       onFormationAdded();
       reset();
       setSelectedFormateurs({});
@@ -383,20 +244,20 @@ const AddDomaine: React.FC<AddFormationProps> = ({ onClose, onFormationAdded }) 
             </div>
           ))}
 
-         {/* <div className="flex justify-between">
+         <div className="flex justify-between">
             <button
               type="button"
-              className="bg-blue-500 text-white px-4 py-2 rounded"
+              className="bg-teal-500 text-white px-4 py-2 rounded"
               onClick={() => appendTheme({ name: "", code: "", formateurs: [] })}
             >
               Ajouter un thème
             </button>
-          </div>*/}
+          </div>
 
           <div className="flex justify-end gap-2 pt-4">
             <button 
               type="button" 
-              className="bg-gray-500 text-white px-4 py-2 rounded" 
+              className="bg-gray-400 text-white px-4 py-2 rounded" 
               onClick={onClose}
             >
               Annuler

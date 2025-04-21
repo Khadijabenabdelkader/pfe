@@ -90,7 +90,8 @@ const NewAdmin: React.FC = () => {
 
   return (
     <>
-      <Breadcrumb pageName="Créer Admin" />
+      <h1 className="text-2xl font-bold text-teal-700 text-center flex-grow">Nouveau Admin</h1>
+
       <div className="flex items-center justify-center min-h-screen  p-6">
       <div className="w-full max-w-4xl bg-white dark:bg-gray-800 shadow-lg rounded-2xl overflow-hidden">
         <div className="grid grid-cols-1 xl:grid-cols-2">
@@ -183,7 +184,7 @@ const NewAdmin: React.FC = () => {
               {/* Bouton de soumission */}
               <button
                 type="submit"
-                className="w-full p-3 mt-4 bg-blue-800 hover:bg-blue-700 text-white font-bold rounded-lg transition-all"
+                className="w-full p-3 mt-4 bg-teal-500 hover:bg-teal-700 text-white font-bold rounded-lg transition-all"
               >
                 Créer un compte
               </button>

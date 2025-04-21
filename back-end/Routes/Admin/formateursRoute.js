@@ -32,6 +32,7 @@ const uploads = multer({
   { name: "coursSession", maxCount: 10 }
 ]);
 
+
 router.post('/formateurs', uploads, addFormateur);
 
 router.get('/formateurs', getFormateurs);

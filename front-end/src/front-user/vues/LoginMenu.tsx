@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./Hooks/useAuthUser";
+import ResetPasswordPage from "./ResetPasswordPage";
 
 interface LoginMenuProps {
   onClose: () => void;
@@ -12,7 +13,10 @@ const LoginMenu: React.FC<LoginMenuProps> = ({ onClose }) => {
   const { login, user } = useAuth();
   const modalRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordResetStep, setPasswordResetStep] = useState<"request" | "reset">("request");
+  const [resetToken, setResetToken] = useState<string | null>(null);
   
   // Formulaires
   const {
@@ -28,9 +32,9 @@ const LoginMenu: React.FC<LoginMenuProps> = ({ onClose }) => {
   } = useForm();
 
   const {
-    register: registerPasswordChange,
-    handleSubmit: handlePasswordChangeSubmit,
-    reset: resetPasswordChange,
+    register: registerPasswordReset,
+    handleSubmit: handlePasswordResetSubmit,
+    reset: resetPasswordReset,
   } = useForm();
 
   // Expressions régulières pour validation
@@ -113,42 +117,68 @@ const LoginMenu: React.FC<LoginMenuProps> = ({ onClose }) => {
     }
   };
 
-  // Fonction pour modifier le mot de passe
-  const onChangePassword = async (data: any) => {
+  // Fonction pour demander la réinitialisation du mot de passe
+  const onRequestPasswordReset = async (data: any) => {
+    try {
+      setError(null);
+      setSuccessMessage(null);
+
+      if (!emailRegex.test(data.mail)) {
+        throw new Error("L'email fourni est invalide.");
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/apiUser/request-password-reset`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mail: data.mail }),
+      });
+
+      const result = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(result.message || "Erreur lors de la demande de réinitialisation");
+      }
+
+      setSuccessMessage("Un email de réinitialisation a été envoyé à votre adresse.");
+      resetPasswordReset();
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
+
+  // Fonction pour réinitialiser le mot de passe
+  const onResetPassword = async (data: any) => {
     try {
       setError(null);
       
-      // Vérification que les nouveaux mots de passe correspondent
       if (data.newPassword !== data.confirmPassword) {
-        throw new Error("Les nouveaux mots de passe ne correspondent pas.");
+        throw new Error("Les mots de passe ne correspondent pas.");
       }
 
-      // Validation du nouveau mot de passe
       if (!passwordRegex.test(data.newPassword)) {
-        throw new Error("Le nouveau mot de passe doit comporter au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.");
+        throw new Error("Le mot de passe doit contenir 8 caractères avec majuscule, minuscule, chiffre et caractère spécial.");
       }
 
-      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/apiUser/change-password`, {
+      const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/apiUser/reset-password`, {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          oldPassword: data.oldPassword,
-          newPassword: data.newPassword
+          token: resetToken,
+          newPassword: data.newPassword,
+          confirmPassword: data.confirmPassword
         }),
       });
 
       const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Erreur lors du changement de mot de passe");
+      
+      if (!response.ok) {
+        throw new Error(result.message || "Erreur lors de la réinitialisation du mot de passe");
+      }
 
-      // Réinitialiser et revenir au formulaire de connexion
-      resetPasswordChange();
+      setSuccessMessage("Votre mot de passe a été réinitialisé avec succès !");
       setIsChangingPassword(false);
-      setError(null);
-      alert("Mot de passe modifié avec succès !");
-
+      setPasswordResetStep("request");
+      resetPasswordReset();
     } catch (error: any) {
       setError(error.message);
     }
@@ -199,7 +229,7 @@ const LoginMenu: React.FC<LoginMenuProps> = ({ onClose }) => {
                   onClick={() => setIsChangingPassword(true)}
                   className="w-full py-2 text-gray-700 font-semibold rounded-md hover:underline"
                 >
-                  Modifier Mot de passe
+                  Mot de passe oublié
                 </button>
               </form>
             </div>
@@ -247,77 +277,51 @@ const LoginMenu: React.FC<LoginMenuProps> = ({ onClose }) => {
           </div>
         ) : (
           <div className="max-w-md mx-auto">
-            <h2 className="text-2xl font-semibold text-gray-700 mb-4">Modifier Mot de passe</h2>
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-            
-            <form onSubmit={handlePasswordChangeSubmit(onChangePassword)} className="space-y-4">
-              <div>
-                <label className="block text-gray-700">Nom</label>
-                <input
-                  {...registerPasswordChange("nom_complet")}
-                  type="text"
-                  placeholder="Nom"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Email</label>
-                <input
-                  {...registerPasswordChange("mail")}
-                  type="email"
-                  placeholder="Adresse Email"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Ancien Mot de passe</label>
-                <input
-                  {...registerPasswordChange("oldPassword")}
-                  type="password"
-                  placeholder="Ancien mot de passe"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Nouveau Mot de passe</label>
-                <input
-                  {...registerPasswordChange("newPassword")}
-                  type="password"
-                  placeholder="Nouveau mot de passe"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700">Confirmer Nouveau Mot de passe</label>
-                <input
-                  {...registerPasswordChange("confirmPassword")}
-                  type="password"
-                  placeholder="Confirmer nouveau mot de passe"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:outline-none"
-                  required
-                />
-              </div>
-              
-              <div className="flex gap-4">
-                <button 
-                  type="button" 
-                  onClick={() => setIsChangingPassword(false)}
-                  className="flex-1 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
-                >
-                  Annuler
-                </button>
-                <button 
-                  type="submit" 
-                  className="flex-1 py-2 bg-gray-700 text-white font-semibold rounded-md hover:bg-gray-800"
-                >
-                  Modifier
-                </button>
-              </div>
-            </form>
+            {passwordResetStep === "request" ? (
+              <>
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">Réinitialiser le mot de passe</h2>
+                {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+                {successMessage && <p className="text-green-500 text-sm mb-4">{successMessage}</p>}
+                
+                <form onSubmit={handlePasswordResetSubmit(onRequestPasswordReset)} className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700">Email</label>
+                    <input
+                      {...registerPasswordReset("mail")}
+                      type="email"
+                      placeholder="Adresse Email"
+                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:outline-none"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="flex gap-4">
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        setIsChangingPassword(false);
+                        setPasswordResetStep("request");
+                        setError(null);
+                        setSuccessMessage(null);
+                      }}
+                      className="flex-1 py-2 bg-gray-300 text-gray-700 font-semibold rounded-md hover:bg-gray-400"
+                    >
+                      Annuler
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="flex-1 py-2 bg-gray-700 text-white font-semibold rounded-md hover:bg-gray-800"
+                    >
+                      Envoyer
+                    </button>
+                  </div>
+                </form>
+              </>
+            ) : (
+              <>
+                <ResetPasswordPage/>
+              </>
+            )}
           </div>
         )}
       </div>

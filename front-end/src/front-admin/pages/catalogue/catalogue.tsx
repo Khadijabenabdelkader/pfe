@@ -5,6 +5,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
 import AddDomaine from "./AddDomain";
+import AddTheme from "./AddTheme.tsx";
 import EditDomaine from "../catalogue/UpdateCatalogue";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -50,7 +51,10 @@ const CatalogueListAdmin: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [selectedFormationId, setSelectedFormationId] = useState<number | null>(null);
   const [showAddDomain, setShowAddDomain] = useState(false);
-  //const [editingFormation, setEditingDomain] = useState<Catalogue | null>(null);
+  const [showAddTheme, setShowAddTheme] = useState<boolean>(false);
+  const [selectedDomain, setSelectedDomain] = useState<{ domaine: string } | null>(null);
+  const [domaineFromButton, setdomaineFromButton] = useState<string>('');
+
   const { user } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedFormateur, setSelectedFormateur] = useState<Formateur | null>(null);
@@ -307,7 +311,25 @@ const CatalogueListAdmin: React.FC = () => {
                 <div key={domaine} className="mb-6">
                   <div className="flex justify-between items-center mb-2">
                     <h3 className="text-xl font-semibold text-teal-700">{domaine}</h3>
-                   
+                    <div className="flex justify-end p-4">
+                      <button
+                        onClick={() => {setShowAddTheme(true);
+                        setSelectedDomain({ domaine});
+                        setdomaineFromButton(domaine);
+                      }}
+                        className="bg-white text-teal-600 px-4 py-2 rounded-lg"
+                      >
+                        + Nouveau Thème ?
+                      </button>
+                    </div>
+                    {showAddTheme && (
+                        <AddTheme 
+                          onFormationAdded={refreshFormations} 
+                          onClose={() => setShowAddTheme(false)} 
+                          domaineFromButton={domaineFromButton }
+                          selectedDomain={ selectedDomain } 
+                        />
+                      )}
                   </div>
                   <button onClick={() => toggleSessionSearch(domaine)} className="text-teal-600 font-semibold">
                     Rechercher thèmes...

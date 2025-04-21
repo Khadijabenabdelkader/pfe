@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import image from "/image2.jpg";
-
+import image from "/oo.png";
+import Footer from '../Footer'; // Assurez-vous que le chemin est correct
 const Domaine: React.FC = () => {
   const [data, setData] = useState('');
   const [filteredData, setFilteredData] = useState<string[]>([]); // Filtered data
@@ -59,12 +59,24 @@ const Domaine: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center top-20 py-8">
-           <div
-        className="absolute inset-0 bg-cover bg-center filter blur-sm z-[-1]"
-        style={{ backgroundImage: `url('${image}')` }}
-      ></div>
-      <h1 className="text-4xl text-center my-20 text-[#477870] mb-8">Domaines</h1>
+ {/*<img 
+  src={image}
+  alt=""
+  className="fixed top-0 left-100 right-100 w-screen h-64 object-contain object-top filter blur-sm z-[-1]"
+/>*/}
+<div className="fixed blur-sm inset-0 z-[-1] bg-black flex items-center justify-center">
+  <img 
+    src={image} 
+    alt=""
+    className="h-full w-auto max-w-none filter "
+    style={{ minWidth: '100vw' }}
+  />
+</div> {/* Votre contenu ici */}
+<div className="backdrop-blur-md bg-white/40 p-5 rounded-lg">
 
+      <h1 className="text-4xl text-center my-10 text-emerald-500 mb-8">Nos Domaines</h1>
+</div>
+<br/>
       <div className="w-full max-w-xl mb-8">
         <input
           type="text"
@@ -108,7 +120,11 @@ const Domaine: React.FC = () => {
           )}
         </div>
       )}
+      < ul className=" mt-auto w-full">
+      <Footer/>
+      </ul>
     </div>
+     
   );
 };
 

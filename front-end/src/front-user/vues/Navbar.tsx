@@ -30,15 +30,14 @@ const Navbar: React.FC = () => {
     navigate("/");
   };
 
-  // Fonction pour gérer l'ouverture/fermeture des menus
   const toggleUserDropdown = () => {
     setUserDropdownOpen(!userDropdownOpen);
-    setCartDropdownOpen(false); // Fermer le panier si l'utilisateur s'affiche
+    setCartDropdownOpen(false); 
   };
 
   const toggleCartDropdown = () => {
     setCartDropdownOpen(!cartDropdownOpen);
-    setUserDropdownOpen(false); // Fermer le menu utilisateur si le panier s'affiche
+    setUserDropdownOpen(false); 
   };
 
   // Fermer les dropdowns quand on clique à l'extérieur
@@ -58,7 +57,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="w-full fixed top-0 left-0 bg-white shadow-md z-50">
+      <nav className="w-full fixed top-0 left-0 bg-white bg-blur shadow-md z-50">
         <div className="flex justify-between items-center p-4 relative">
           {/* Logo */}
           <div>
@@ -93,18 +92,15 @@ const Navbar: React.FC = () => {
             ))}
           </ul>
 
-          {/* Icône pour Login ou Menu Utilisateur */}
           <div className="relative flex items-center" ref={dropdownRef}>
             {user ? (
               <div className="flex items-center">
-                {/* Avatar de l'utilisateur */}
                 <img
                   src={user.avatar || "/default-avatar.png"}
                   className="h-10 w-10 rounded-full object-cover border border-gray-300 cursor-pointer"
                   onClick={toggleUserDropdown}
                 />
 
-                {/* Icône du panier */}
                 {!user.isFormateur && (
                   <IonIcon
                     icon={cartOutline}
@@ -121,12 +117,10 @@ const Navbar: React.FC = () => {
               />
             )}
 
-            {/* Dropdown User */}
             {userDropdownOpen && (
               <DropdownUser dropdownOpen={userDropdownOpen} toggleDropdown={toggleUserDropdown} />
             )}
 
-            {/* Dropdown Cart */}
             {cartDropdownOpen && !user.isFormateur && (
               <DropdownCart toggleDropdown={toggleCartDropdown} dropdownOpen={cartDropdownOpen} />
             )}

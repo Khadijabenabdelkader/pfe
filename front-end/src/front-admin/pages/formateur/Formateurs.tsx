@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../hooks/useAuthAdmin";
-import Breadcrumb from "../components/Breadcrumbs/Breadcrumb";
+import { useAuth } from "../../hooks/useAuthAdmin";
+import Breadcrumb from "../../components/Breadcrumbs/Breadcrumb";
 
 interface Formateur {
   id_formateur: number;
@@ -44,23 +44,7 @@ const Formateurs: React.FC = () => {
         console.error("Erreur lors de la récupération des formateurs:", error.response?.data || error.message);
       });
   }, [user]);
-  /*useEffect(() => {
-    if (!user) return;
-    axios
-      .get(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/formateurs`)
-      .then((response) => {
-        const sortedFormateurs = response.data.map((formateur: Formateur) => ({
-          ...formateur,
-          domaine_de_competences: JSON.parse(formateur.domaine_de_competences || "[]"),
-          themes_a_enseigner: JSON.parse(formateur.themes_a_enseigner || "[]"),
-        })).sort((a: Formateur, b: Formateur) => b.id_formateur - a.id_formateur);
-        setFormateurs(sortedFormateurs);
-        setFilteredFormateurs(sortedFormateurs);
-      })
-      .catch((error) => {
-        console.error("Erreur lors de la récupération des formateurs:", error.response?.data || error.message);
-      });
-  }, [user]);*/
+ 
 
   useEffect(() => {
     if (!id || !searchTerm) return;
@@ -142,7 +126,8 @@ const Formateurs: React.FC = () => {
 
   return (
     <>
-    <Breadcrumb pageName="Formateurs" />
+                <h1 className="text-2xl font-bold text-teal-700 text-center flex-grow">Formateurs</h1>
+
 
     <div className="container mx-auto p-6 mt-12">
       <input
@@ -150,17 +135,19 @@ const Formateurs: React.FC = () => {
         placeholder="Rechercher un formateur..."
         value={searchTerm}
         onChange={handleSearchChange}
-        className="w-full p-3 mb-6 text-base rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className="w-full p-3 mb-6 text-base rounded-lg border focus:outline-none focus:ring-2 focus:ring-teal-600"
       />
-  
+   <div className="flex justify-end p-4">
       {(user.nom_acces === "super_admin" || user.nom_acces === "editeur formateur") && (
+       
         <button
-          className="w-full mt-6 p-3 bg-blue-800 text-white rounded-lg hover:bg-blue-600"
+          className="bg-teal-500 text-white px-4 py-2 rounded-lg"
           onClick={handleAddClick}
         >
-          Ajouter Formateur
+          + Nouveau Formateur ?
         </button>
-      )}
+        
+      )}</div>
 
       <h2 className="text-red text-xl">{errorMessage}</h2>
 
@@ -183,7 +170,7 @@ const Formateurs: React.FC = () => {
 
               {(user.nom_acces === "super_admin" || user.nom_acces === "editeur formateur") && (
                 <button
-                  className="px-3 py-1 bg-blue-800 text-white rounded-lg hover:bg-blue-600 text-sm"
+                  className="px-3 py-1 bg-teal-500 text-white rounded-lg hover:bg-tela-800 text-sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleEditClick(formateur.id_formateur);
@@ -195,7 +182,7 @@ const Formateurs: React.FC = () => {
 
               {user.nom_acces === "super_admin" && (
                 <button
-                  className="px-3 py-1 bg-red-800 text-white rounded-lg hover:bg-red-600 text-sm"
+                  className="px-3 py-1 bg-gray-400 text-white rounded-lg hover:bg-red-600 text-sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleDelete(formateur.id_formateur);

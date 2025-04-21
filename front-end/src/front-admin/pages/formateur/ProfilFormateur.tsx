@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import { useAuth } from "../hooks/useAuthAdmin";
+import { useAuth } from "../../hooks/useAuthAdmin";
 interface DomaineTheme {
   domaine: string;
   theme: string[];
@@ -148,7 +148,7 @@ const ProfilFormateur: React.FC = () => {
       }
     
       if (value.length === 0 && (key === 'domaine_de_competences' || key === 'themes_a_enseigner')) {
-        formData.append(key, ''); // Empty value for unselected fields
+        formData.append(key, JSON.stringify(value)); // <- ✅ JSON stringify pour MySQL
       } else {
         if (Array.isArray(value)) {
           value.forEach((item) => {
@@ -590,7 +590,7 @@ const ProfilFormateur: React.FC = () => {
           </>
         ) : (
           <button
-            className={`px-4 py-2 rounded-lg text-white ${canEdit ? "bg-blue-800 hover:bg-blue-600" : "bg-gray-400 cursor-not-allowed"}`}
+            className={`px-4 py-2 rounded-lg text-white ${canEdit ? "bg-teal-500 hover:bg-teal-700" : "bg-gray-400 cursor-not-allowed"}`}
             onClick={() => {
               if (canEdit) {
                 setIsEditing(true);

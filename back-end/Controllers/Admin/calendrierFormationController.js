@@ -4,7 +4,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const upload = multer({ dest: 'uploads/' });
-    
+   {/* 
   const createCalendrierformation = async (req, res) => {
     const data = req.body;
     if (!Array.isArray(data)) {
@@ -31,7 +31,7 @@ const upload = multer({ dest: 'uploads/' });
         res.json({ message: "Calendrier sauvegardé avec succès", id_cal ,rowsAffected: results.affectedRows });
     });
   };
-
+*/}
   
   // Suppression d'une session d'un calendrier
 const deleteSessionFromCalendrier = async (req, res) => {
@@ -130,7 +130,7 @@ const getcalformation=(req, res) => {
   };
   
 
-
+{/*
   
   module.exports = {
     createCalendrierformation,
@@ -139,4 +139,187 @@ const getcalformation=(req, res) => {
     deleteSessionFromCalendrier,
     addSessionToCalendrier
    
-  };
+  };*/}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  const createCalendrierformation = async (req, res) => {
+    // Vérification que la requête contient un tableau
+    if (!req.body || !Array.isArray(req.body)) {
+        return res.status(400).json({
+            success: false,
+            message: "Format de requête invalide. Un tableau de sessions est attendu.",
+            error_code: "INVALID_REQUEST_FORMAT"
+        });
+    }
+
+    // Vérification que le tableau n'est pas vide
+    if (req.body.length === 0) {
+        return res.status(400).json({
+            success: false,
+            message: "Aucune donnée à traiter",
+            error_code: "EMPTY_DATA_ARRAY"
+        });
+    }
+
+    const errors = [];
+    const successfulUpdates = [];
+
+    try {
+        // Traitement de chaque session dans le tableau
+        for (const [index, sessionData] of req.body.entries()) {
+            try {
+                // Validation des champs obligatoires
+                if (!sessionData.id_session) {
+                    throw new Error("Le champ 'id_session' est obligatoire pour la mise à jour");
+                }
+
+                if (!sessionData.date_debut || !sessionData.date_fin) {
+                    throw new Error("Les champs 'date_debut' et 'date_fin' sont obligatoires");
+                }
+
+                // Validation du format des dates
+                let startDate, endDate;
+                
+                try {
+                    startDate = new Date(sessionData.date_debut);
+                    if (isNaN(startDate.getTime())) {
+                        throw new Error("Format de date_debut invalide");
+                    }
+                } catch (e) {
+                    throw new Error("Format de date_debut invalide");
+                }
+                
+                try {
+                    endDate = new Date(sessionData.date_fin);
+                    if (isNaN(endDate.getTime())) {
+                        throw new Error("Format de date_fin invalide");
+                    }
+                } catch (e) {
+                    throw new Error("Format de date_fin invalide");
+                }
+
+                // Vérification que la date de fin est après la date de début
+                if (endDate < startDate) {
+                    throw new Error("La date de fin doit être postérieure à la date de début");
+                }
+
+                // Calcul de la durée si non fournie
+                let duree = sessionData.duree;
+                if (!duree || duree <= 0) {
+                    const timeDiff = endDate.getTime() - startDate.getTime();
+                    duree = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // +1 pour inclure le jour de début
+                }
+
+                // Mise à jour de la session existante
+                const [result] = await db.query(
+                    `UPDATE session 
+                    SET date_debut = ?, date_fin = ?, duree = ?
+                    WHERE id_session = ?`,
+                    [
+                        sessionData.date_debut,
+                        sessionData.date_fin,
+                        duree,
+                        sessionData.id_session
+                    ]
+                );
+
+                // Vérification qu'une ligne a bien été mise à jour
+                if (result.affectedRows === 0) {
+                    throw new Error("Aucune session trouvée avec cet id_session");
+                }
+
+                successfulUpdates.push({
+                    id_session: sessionData.id_session,
+                    date_debut: sessionData.date_debut,
+                    date_fin: sessionData.date_fin,
+                    duree: duree,
+                    updated: true
+                });
+
+            } catch (error) {
+                errors.push({
+                    item_index: index,
+                    input_data: sessionData,
+                    error: error.message,
+                    error_code: error.code || "SESSION_UPDATE_ERROR"
+                });
+                console.error(`Erreur sur l'item ${index}:`, error);
+            }
+        }
+
+        // Préparation de la réponse
+        if (successfulUpdates.length === 0) {
+            return res.status(422).json({
+                success: false,
+                message: "Aucune session n'a pu être mise à jour",
+                total_items: req.body.length,
+                updated_items: 0,
+                failed_items: errors.length,
+                errors: errors
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: `${successfulUpdates.length} session(s) mise(s) à jour avec ${errors.length} erreur(s)`,
+            total_items: req.body.length,
+            updated_items: successfulUpdates.length,
+            failed_items: errors.length,
+            data: successfulUpdates,
+            ...(errors.length > 0 && { errors: errors })
+        });
+
+    } catch (globalError) {
+        console.error('Erreur globale du contrôleur:', globalError);
+        return res.status(500).json({
+            success: false,
+            message: "Erreur interne du serveur",
+            error: globalError.message,
+            error_code: "INTERNAL_SERVER_ERROR"
+        });
+    }
+};
+
+
+
+
+
+
+
+  module.exports = {
+    createCalendrierformation,
+    deleteCalendrierFormation,
+    getcalformation,
+    deleteSessionFromCalendrier,
+    addSessionToCalendrier
+   };

@@ -69,7 +69,7 @@ const Settings = () => {
   return (
     <>
       <div className="mx-auto max-w-270">
-        <Breadcrumb pageName="paramétre" />
+      <h1 className="text-2xl font-bold text-teal-600  flex-grow">Paramétres</h1>
 
         <div className="grid grid-cols-5 gap-8">
           <div className="col-span-5 xl:col-span-3">
@@ -180,7 +180,7 @@ const Settings = () => {
                       Annuler
                     </button>
                     <button
-                      className="flex justify-center rounded bg-primary py-2 px-6 font-medium text-gray hover:bg-opacity-90"
+                      className="flex justify-center rounded bg-primary bg-teal-500 py-2 px-6 font-medium text-gray hover:bg-opacity-90"
                       type="button"
                       onClick={handleConfirm}
                     >

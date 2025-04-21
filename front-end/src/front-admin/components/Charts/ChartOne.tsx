@@ -8,7 +8,7 @@ const ChartOne: React.FC = () => {
 
   useEffect(() => {
     // Récupérer le nombre de sessions par formateur
-    axios.get(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/sessions-stats`)
+    axios.get(`${import.meta.env.VITE_APP_API_URL}/api/sessions-stats`)
       .then(response => {
         console.log("Données des sessions:", response.data);  // Ajoutez ce log
         setSessionsData(response.data);
@@ -16,7 +16,7 @@ const ChartOne: React.FC = () => {
       .catch(error => console.error("Erreur chargement des sessions:", error));
   
     // Récupérer le nombre d'avis par mois
-    axios.get(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/avis-stats`)
+    axios.get(`${import.meta.env.VITE_APP_API_URL}/api/avis-stats`)
       .then(response => {
         console.log("Données des avis:", response.data);  // Ajoutez ce log
         setAvisData(response.data);

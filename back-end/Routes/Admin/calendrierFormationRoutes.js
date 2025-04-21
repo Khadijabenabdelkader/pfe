@@ -37,5 +37,4 @@ router.post('/create/calendrierformation', createCalendrierformation);
 router.delete('/:id', verifyToken, deleteCalendrierFormation);
 router.delete('/calendrier/:id_cal/session/:id_session', deleteSessionFromCalendrier);
 router.post('/calendrier/:id_cal/session', addSessionToCalendrier);
-
 module.exports = router;

@@ -536,7 +536,7 @@ const AddFormateur: React.FC = () => {
 
 <button 
   type="submit" 
-  className="bg-blue-700 hover:bg-blue-500 text-white py-2 px-4 rounded w-full mt-4"
+  className="bg-teal-500 hover:bg-teal-700 text-white py-2 px-4 rounded w-full mt-4"
 >
   Ajouter
 </button>

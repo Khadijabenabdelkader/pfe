@@ -947,7 +947,7 @@ const ShowCalendrierformation = () => {
     return (
       <div className="p-6 max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Calendrier de Formation</h1>
+          <h1 className="text-2xl text-teal-500 text-center font-bold">Calendrier des Formations</h1>
           <button
             onClick={handleCreateNewCalendar}
             className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"

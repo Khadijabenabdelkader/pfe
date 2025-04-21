@@ -318,7 +318,8 @@ const FeuillePresence = () => {
   
   return (
     <div className="container mx-auto p-4 font-sans">
-      <h1 className="text-2xl font-bold text-center mb-6">Feuille de Présence</h1>
+
+      <h1 className="text-2xl text-teal-600 font-bold text-center mb-6">Feuille de Présence</h1>
       
       {/* Section Crédit d'impôt et Droits de tirage */}
       <div className="mb-6 p-4 border rounded">
@@ -688,7 +689,7 @@ const FeuillePresence = () => {
       <div className="flex justify-center">
         <button 
           onClick={handleFormSubmit} 
-          className="px-6 py-3 bg-green-500 text-white rounded hover:bg-green-600"
+          className="px-6 py-3 bg-teal-500 text-white rounded hover:bg-green-600"
         >
           Enregistrer la feuille de présence
         </button>

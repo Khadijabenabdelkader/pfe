@@ -80,10 +80,9 @@ const GroupManagement = () => {
 
   return (
     <>
-          <Breadcrumb pageName="gestion des accées" />
           
     <div className="p-4">
-      <h2 className="text-xl font-semibold mb-4">Gestion des Groupes</h2>
+      <h2 className="text-xl text-center text-teal-500 font-semibold mb-4">Gérer les rôles des admin</h2>
 
       {/* Champ de recherche unique */}
       <div className="relative mb-4">

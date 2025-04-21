@@ -16,6 +16,9 @@ module.exports = {
       ...defaultTheme.screens,
     },
     extend: {
+      blur: {
+        sm: '4px', // Remplacer 4px par 2px
+      },
       colors: {
         current: 'currentColor',
         transparent: 'transparent',

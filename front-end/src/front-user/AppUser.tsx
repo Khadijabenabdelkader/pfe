@@ -1,6 +1,6 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import image from "/image2.jpg";
+import ui1 from "/ui1.jpg";
 import Footer from './vues/Footer.tsx'; 
 import Navbar from './vues/Navbar.tsx';
 import Catalogue from './vues/Navbar/Catalogue.tsx';
@@ -15,7 +15,7 @@ import AvisFormateur from "./vues/Navbar/AvisFormateur.tsx";
 import DemanderFormation from "./vues/Navbar/DemanderFormation.tsx";
 import Contact from "./vues/Footer.tsx";
 import { AuthProvider } from "./vues/Context/AuthProviderUser";
-
+import ResetPasswordPage from "./vues/ResetPasswordPage.tsx";
 const AppUser = () => {
   return (
 
@@ -25,14 +25,11 @@ const AppUser = () => {
           <Routes>
             <Route path="/" element={
               <div className="relative top-20">
-                <div 
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${image})`, filter: 'blur(8px)', zIndex: -1 }}
-                />
+                
                 <div className="relative z-10">
                   <>
                   <Presentation />
-                  <Domaine />
+                 {/* <Domaine />*/}
                   </>
                 </div>
               </div>
@@ -47,6 +44,7 @@ const AppUser = () => {
             <Route path="/avis_formateur" element={<AvisFormateur />} />
             <Route path="/demander_formation" element={<DemanderFormation />} />
             <Route path="/Contact" element={<Contact />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           </Routes>
           <hr />

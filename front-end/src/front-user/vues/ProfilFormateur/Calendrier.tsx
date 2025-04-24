@@ -55,7 +55,7 @@ const Calendrier: React.FC = () => {
     if (title) {
       axios
         .post(
-          `${import.meta.env.VITE_APP_API_URL}/api/calendrier`,
+          `${import.meta.env.VITE_APP_API_URL}/apiAdmin/calendrierEvent/create`,
           {
             title,
             date: info.dateStr,
@@ -78,6 +78,7 @@ const Calendrier: React.FC = () => {
         })
         .catch((error) => {
           console.error("Erreur lors de la création de l'événement :", error);
+          alert("Erreur lors de la création de l'événement. Veuillez réessayer.");
         });
     }
   };

@@ -139,7 +139,7 @@ const getFormateursBySession = async (req, res) => {
     }
 
     const sessionTheme = sessionResults[0].theme;
-    console.log(`Thème de la session ${id_session}: ${sessionTheme}`); // Log
+    //console.log(`Thème de la session ${id_session}: ${sessionTheme}`); // Log
 
     // 2. Récupération des formateurs
     const formateurs = await new Promise((resolve, reject) => {

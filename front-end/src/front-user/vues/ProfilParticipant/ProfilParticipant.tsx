@@ -90,7 +90,7 @@ const ProfilParticipant: React.FC = () => {
     
     setParticipant((prevData) => {
       if (prevData) {
-        return { ...prevData, nature_participant: value || 'personne' }; // Définit une valeur par défaut si nécessaire
+        return { ...prevData, nature_participant: value || 'personne physique' }; // Définit une valeur par défaut si nécessaire
       }
       return prevData;
     });
@@ -179,7 +179,7 @@ const ProfilParticipant: React.FC = () => {
   return (
     <div className="max-w-xl pt-30 mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
       <h2 className="text-3xl text-center font-semibold text-teal-600 dark:text-white mb-4">
-        Profil du Participant
+        Mon Profil
       </h2>
 
       {isEditing ? (
@@ -236,7 +236,7 @@ const ProfilParticipant: React.FC = () => {
               onChange={handleNatureChange}
               className="w-full p-2 border rounded-md"
             >
-              <option value="personne">Personne</option>
+              <option value="personne">Personne physique</option>
               <option value="entreprise">Entreprise</option>
             </select>
           </div>
@@ -348,7 +348,7 @@ const ProfilParticipant: React.FC = () => {
             onClick={() => setIsEditing(true)}
             className="w-full p-3 bg-teal-600 text-white rounded-md mt-4"
           >
-            Modifier le profil
+            Modifier mon profil
           </button>
         </div>
       )}

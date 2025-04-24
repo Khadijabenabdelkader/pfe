@@ -1,121 +1,347 @@
 const db = require('../../connect');
-const sessionStats = async (req, res) => {
+
+// Fonction de conversion des évaluations textuelles en notes
+const convertEvaluationToNote = (evaluation) => {
+  switch(evaluation) {
+    case 'Insuffisant': return 1;
+    case 'Peu satisfaisant': return 2;
+    case 'Satisfaisant': return 3;
+    case 'Très satisfaisant': return 4;
+    case 'Excellent': return 5;
+    default: return 0; // Valeur par défaut si non reconnu
+  }
+};
+
+// Fonction utilitaire pour normaliser les résultats de la base de données
+const normalizeDbResult = (result) => {
+  if (Array.isArray(result)) return result;
+  if (result?.rows) return result.rows;
+  if (Array.isArray(result?.[0])) return result[0];
+  if (result) return [result];
+  return [];
+};
+
+const Avis = {
+  async getAvisBySession(id_session) {
     try {
-      const query = `
-        SELECT f.nom_complet AS nom_formateur, COUNT(s.id_session) AS nombre_sessions
-        FROM session s
-        JOIN formateur f ON s.id_formateur = f.id_formateur
-        GROUP BY s.id_formateur;
-      `;
-      
-      console.log("Exécution de la requête SQL : ", query);  // Log de la requête SQL
+      const result = await db.query(`
+        SELECT 
+          s.id_session,
+          s.theme,
+          a.note,
+          a.adaptation_programme_vie_pro,
+          a.moyens_pedagogiques_utilises,
+          a.convenance_horaires_formation,
+          a.apports_niveau_professionnel,
+          a.qualite_documentation_distribuee,
+          a.maitrise_globale_sujets_presentes,
+          a.traitement_exemples_travail,
+          a.animations_seances,
+          a.homogeneite_groupe,
+          a.satisfaction_attentes,
+          a.duree_formation
+        FROM avis a
+        JOIN session s ON a.id_session = s.id_session
+        WHERE s.id_session = ?
+      `, [id_session]);
   
-      const result = await db.query(query);  // Assurez-vous d'utiliser la méthode correcte pour votre bibliothèque DB
-      console.log("Résultats récupérés des statistiques des formateurs:", result);  // Log des résultats bruts
+      const rows = normalizeDbResult(result);
   
-      if (result && result.length > 0) {
-        const rows = result[0];  // Si tu utilises mysql2, les données sont dans result[0]
-        console.log("Lignes retournées:", rows);  // Vérification des lignes retournées
-        res.json(rows);  // Retourne les données au frontend
-      } else {
-        console.log("Aucune donnée trouvée pour les statistiques des formateurs");
-        res.json([]);  // Si aucune donnée n'est trouvée, renvoie un tableau vide
-      }
+      return rows.map(row => ({
+        id_session: row.id_session,
+        theme: row.theme,
+        note: convertEvaluationToNote(row.note),
+        adaptation_programme_vie_pro: convertEvaluationToNote(row.adaptation_programme_vie_pro),
+        moyens_pedagogiques_utilises: convertEvaluationToNote(row.moyens_pedagogiques_utilises),
+        convenance_horaires_formation: convertEvaluationToNote(row.convenance_horaires_formation),
+        apports_niveau_professionnel: convertEvaluationToNote(row.apports_niveau_professionnel),
+        qualite_documentation_distribuee: convertEvaluationToNote(row.qualite_documentation_distribuee),
+        maitrise_globale_sujets_presentes: convertEvaluationToNote(row.maitrise_globale_sujets_presentes),
+        traitement_exemples_travail: convertEvaluationToNote(row.traitement_exemples_travail),
+        animations_seances: convertEvaluationToNote(row.animations_seances),
+        homogeneite_groupe: convertEvaluationToNote(row.homogeneite_groupe),
+        satisfaction_attentes: convertEvaluationToNote(row.satisfaction_attentes),
+        duree_formation: convertEvaluationToNote(row.duree_formation)
+      }));
     } catch (error) {
-      console.error("Erreur dans la récupération des statistiques des formateurs :", error);
-      res.status(500).json({ error: "Erreur lors de la récupération des statistiques des formateurs" });
+      console.error('Error in getAvisBySession:', error);
+      throw error;
     }
-  };
+  },
   
-const avisStats = async (req, res) => {
+
+  async getSessions() {
     try {
-      const query = `
-        SELECT DATE_FORMAT(date_creation, '%Y-%m') AS mois, COUNT(id_avis) AS nombre_avis
-        FROM avis
-        GROUP BY mois
-        ORDER BY mois ASC;
-      `;
-  
-      console.log("Exécution de la requête SQL : ", query);  // Log de la requête SQL
-  
-      const result = await db.query(query); // Assurez-vous d'utiliser la bonne méthode de requête pour votre bibliothèque DB
-      console.log("Résultats récupérés des statistiques des avis:", result);  // Log des résultats bruts
-  
-      if (result && result.length > 0) {
-        const rows = result[0];  // Si tu utilises mysql2, les données sont dans result[0]
-        console.log("Lignes retournées:", rows);  // Vérification des lignes retournées
-        res.json(rows);  // Retourne les données au frontend
-      } else {
-        console.log("Aucune donnée trouvée pour les statistiques des avis");
-        res.json([]);  // Si aucune donnée n'est trouvée, renvoie un tableau vide
-      }
+      const result = await db.query('SELECT * FROM session');
+      return normalizeDbResult(result);
     } catch (error) {
-      console.error("Erreur dans la récupération des statistiques des avis :", error);
-      res.status(500).json({ error: "Erreur lors de la récupération des statistiques des avis" });
+      console.error('Error in getSessions:', error);
+      throw error;
     }
   }
-  
-const participantStats = async (req, res) => {
-    try {
-      const query = `
-        SELECT nature_participant, COUNT(id_participant) AS nombre_participants
-        FROM participant
-        GROUP BY nature_participant;
-      `;
-  
-      console.log("Exécution de la requête SQL : ", query);  // Log de la requête SQL
-  
-      const result = await db.query(query);
-      console.log("Résultats récupérés des statistiques des participants:", result);  // Log des résultats bruts
-  
-      if (result && result.length > 0) {
-        const rows = result[0];  // Vérifie si tu manipules correctement le résultat
-        console.log("Lignes retournées:", rows);  // Vérification des lignes retournées
-        res.json(rows);
-      } else {
-        console.log("Aucune donnée trouvée pour les statistiques des participants");
-        res.json([]);  // Retourne un tableau vide si aucune donnée n'est trouvée
-      }
-    } catch (error) {
-      console.error("Erreur dans la récupération des statistiques des participants :", error);
-      res.status(500).json({ error: "Erreur lors de la récupération des statistiques des participants" });
-    }
-  }
-  
-  const sessionsPopulaire = async (req, res) => {
-    try {
-        const query = `
-            SELECT s.theme, f.domaine, COUNT(p.id_participant) AS nombre_participants
-            FROM participant p
-            JOIN session s ON p.id_session = s.id_session
-            JOIN formation f ON s.id_formation = f.id_formation
-            GROUP BY s.theme, f.domaine
-            ORDER BY nombre_participants DESC
-            LIMIT 5;
-        `;
-
-        console.log("Exécution de la requête SQL :", query);
-
-        const result = await db.query(query);  // Assure-toi que le premier élément est un tableau
-
-        console.log("Données retournées :", result);  // Vérifie la structure des résultats
-
-        if (rows.length > 0) {
-            res.json(rows);
-        } else {
-            console.log("Aucune donnée trouvée.");
-            res.json([]);
-        }
-    } catch (error) {
-        console.error("Erreur lors de la récupération des sessions populaires :", error);
-        res.status(500).json({ error: "Erreur lors de la récupération des sessions populaires" });
-    }
 };
 
 
+const getAllSessionsWithAverages = async (req, res) => {
+  try {
+    const sessions = await Avis.getSessions();
+
+    const sessionsWithAverages = await Promise.all(
+      sessions.map(async (session) => {
+        const avis = await Avis.getAvisBySession(session.id_session);
+        const calculateAverage = (field) => {
+          if (avis.length === 0) return 0;
+          const validValues = avis.map(item => Number(item[field]) || 0);
+          const sum = validValues.reduce((acc, val) => acc + val, 0);
+          return (sum / avis.length).toFixed(2);
+        };
+
+        return {
+          id_session: session.id_session,
+          theme: session.theme,
+          moyenne_note: calculateAverage('note'),
+          moyenne_adaptation: calculateAverage('adaptation_programme_vie_pro'),
+          moyenne_pedagogie: calculateAverage('moyens_pedagogiques_utilises'),
+          moyenne_horaires: calculateAverage('convenance_horaires_formation'),
+          moyenne_apports: calculateAverage('apports_niveau_professionnel'),
+          moyenne_documentation: calculateAverage('qualite_documentation_distribuee'),
+          moyenne_maitrise: calculateAverage('maitrise_globale_sujets_presentes'),
+          moyenne_exemples: calculateAverage('traitement_exemples_travail'),
+          moyenne_animation: calculateAverage('animations_seances'),
+          moyenne_homogeneite: calculateAverage('homogeneite_groupe'),
+          moyenne_satisfaction: calculateAverage('satisfaction_attentes'),
+          moyenne_duree: calculateAverage('duree_formation'),
+          nombre_avis: avis.length
+        };
+      })
+    );
+
+    res.json(sessionsWithAverages);
+  } catch (error) {
+    console.error('Error in getAllSessionsWithAverages:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Erreur serveur',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+const getSessions = async (req, res) => {
+  try {
+    const sessions = normalizeDbResult(await Avis.getSessions());
+    res.json(sessions);
+  } catch (error) {
+    console.error('Error in getSessions:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Erreur lors de la récupération des sessions'
+    });
+  }
+};
+
+const getAdminStats = async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        COUNT(*) as total_admins,
+        SUM(CASE WHEN id_acces != 4 THEN 1 ELSE 0 END) as admins,
+        SUM(CASE WHEN id_acces = 4 THEN 1 ELSE 0 END) as super_admins
+      FROM admin
+    `;
+    
+    const results = await new Promise((resolve, reject) => {
+      db.query(query, (error, results) => {
+        if (error) return reject(error);
+        const cleanResults = {
+          total_admins: results[0].total_admins,
+          admins: results[0].admins,
+          super_admins: results[0].super_admins
+        };
+        resolve(cleanResults);
+      });
+    });
+
+    res.json({
+      success: true,
+      data: results
+    });
+
+  } catch (error) {
+    console.error('Error fetching admin stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching admin statistics'
+    });
+  }
+};const getSessionStats = async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+  id_cal,
+  COUNT(*) AS nombre_sessions,
+  GROUP_CONCAT(mois ORDER BY id SEPARATOR ', ') AS mois_concaténés
+FROM 
+  calendrierformation
+WHERE 
+  id_domaine IS NOT NULL
+  AND date_debut IS NOT NULL
+GROUP BY 
+  id_cal
+ORDER BY 
+  id_cal;
+
+    `;
+    
+    const rawResults = await new Promise((resolve, reject) => {
+      db.query(query, (error, results) => {
+        if (error) return reject(error);
+        
+        // Nettoyer les résultats ici, AVANT de les renvoyer
+        const cleanResults = results.map(row => ({
+          id_cal: row.id_cal,
+          nombre_sessions: row.nombre_sessions,
+          mois_concaténés: row.mois_concaténés
+        }));
+
+        resolve(cleanResults); // <- pas les résultats bruts
+      });
+    });
+
+    res.json({
+      success: true,
+      data: rawResults // <- ici c'est propre
+    });
+
+  } catch (error) {
+    console.error('Error fetching session stats:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching session statistics'
+    });
+  }
+};
+
 module.exports = {
-    sessionStats,
-    avisStats,
-    participantStats,
-    sessionsPopulaire
-}
+  getSessions,
+  getAllSessionsWithAverages,
+  getAdminStats,
+  getSessionStats,
+
+};
+/*const db = require('../../connect');
+
+// Fonction utilitaire pour normaliser les résultats
+const normalizeDbResult = (result) => {
+  if (Array.isArray(result)) return result;
+  if (result?.rows) return result.rows;
+  if (Array.isArray(result?.[0])) return result[0];
+  return [];
+};
+
+const Avis = {
+  async getAvisBySession(id_session) {
+    try {
+      const result = await db.query(`
+        SELECT 
+          note,
+          commentaire,
+          adaptation_programme_vie_pro,
+          moyens_pedagogiques_utilises,
+          convenance_horaires_formation,
+          apports_niveau_professionnel,
+          qualite_documentation_distribuee,
+          maitrise_globale_sujets_presentes,
+          traitement_exemples_travail,
+          animations_seances,
+          homogeneite_groupe,
+          satisfaction_attentes,
+          duree_formation
+        FROM avis_participant
+        WHERE id_session = ?
+      `, [id_session]);
+
+      return normalizeDbResult(result);
+    } catch (error) {
+      console.error('Error in getAvisBySession:', error);
+      throw error;
+    }
+  },
+
+  async getAllSessionsAverages() {
+    try {
+      const result = await db.query(`
+        SELECT 
+          s.id_session,
+          s.theme,
+          AVG(CASE WHEN a.note IS NOT NULL THEN a.note ELSE 0 END) AS moyenne_note,
+          AVG(CASE WHEN a.adaptation_programme_vie_pro IS NOT NULL THEN a.adaptation_programme_vie_pro ELSE 0 END) AS moyenne_adaptation,
+          AVG(CASE WHEN a.moyens_pedagogiques_utilises IS NOT NULL THEN a.moyens_pedagogiques_utilises ELSE 0 END) AS moyenne_pedagogie,
+          AVG(CASE WHEN a.convenance_horaires_formation IS NOT NULL THEN a.convenance_horaires_formation ELSE 0 END) AS moyenne_horaires,
+          AVG(CASE WHEN a.apports_niveau_professionnel IS NOT NULL THEN a.apports_niveau_professionnel ELSE 0 END) AS moyenne_apports,
+          AVG(CASE WHEN a.qualite_documentation_distribuee IS NOT NULL THEN a.qualite_documentation_distribuee ELSE 0 END) AS moyenne_documentation,
+          AVG(CASE WHEN a.maitrise_globale_sujets_presentes IS NOT NULL THEN a.maitrise_globale_sujets_presentes ELSE 0 END) AS moyenne_maitrise,
+          AVG(CASE WHEN a.traitement_exemples_travail IS NOT NULL THEN a.traitement_exemples_travail ELSE 0 END) AS moyenne_exemples,
+          AVG(CASE WHEN a.animations_seances IS NOT NULL THEN a.animations_seances ELSE 0 END) AS moyenne_animation,
+          AVG(CASE WHEN a.homogeneite_groupe IS NOT NULL THEN a.homogeneite_groupe ELSE 0 END) AS moyenne_homogeneite,
+          AVG(CASE WHEN a.satisfaction_attentes IS NOT NULL THEN a.satisfaction_attentes ELSE 0 END) AS moyenne_satisfaction,
+          AVG(CASE WHEN a.duree_formation IS NOT NULL THEN a.duree_formation ELSE 0 END) AS moyenne_duree,
+          COUNT(a.id_avis) AS nombre_avis
+        FROM session s
+        LEFT JOIN avis_participant a ON s.id_session = a.id_session
+        GROUP BY s.id_session, s.theme
+        ORDER BY s.id_session
+      `);
+
+      const rows = normalizeDbResult(result);
+      
+      return rows.map(row => ({
+        ...row,
+        moyenne_note: parseFloat(row.moyenne_note) || 0,
+        moyenne_adaptation: parseFloat(row.moyenne_adaptation) || 0,
+        moyenne_pedagogie: parseFloat(row.moyenne_pedagogie) || 0,
+        moyenne_horaires: parseFloat(row.moyenne_horaires) || 0,
+        moyenne_apports: parseFloat(row.moyenne_apports) || 0,
+        moyenne_documentation: parseFloat(row.moyenne_documentation) || 0,
+        moyenne_maitrise: parseFloat(row.moyenne_maitrise) || 0,
+        moyenne_exemples: parseFloat(row.moyenne_exemples) || 0,
+        moyenne_animation: parseFloat(row.moyenne_animation) || 0,
+        moyenne_homogeneite: parseFloat(row.moyenne_homogeneite) || 0,
+        moyenne_satisfaction: parseFloat(row.moyenne_satisfaction) || 0,
+        moyenne_duree: parseFloat(row.moyenne_duree) || 0,
+        nombre_avis: parseInt(row.nombre_avis) || 0
+      }));
+    } catch (error) {
+      console.error('Error in getAllSessionsAverages:', error);
+      throw error;
+    }
+  },
+
+  async getSessions() {
+    try {
+      const result = await db.query('SELECT * FROM session');
+      return normalizeDbResult(result);
+    } catch (error) {
+      console.error('Error in getSessions:', error);
+      throw error;
+    }
+  }
+};
+
+const getAllSessionsWithAverages = async (req, res) => {
+  try {
+    const sessionsWithAverages = await Avis.getAllSessionsAverages();
+    res.json(sessionsWithAverages);
+  } catch (error) {
+    console.error('Error in getAllSessionsWithAverages:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Erreur serveur',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+module.exports = {
+  getAllSessionsWithAverages
+};*/

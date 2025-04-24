@@ -77,44 +77,42 @@ const Catalogue: React.FC = () => {
     setFilteredFormations(filtered);
   };
   const handleAjout = (session: Session) => {
-    if (isLoggedIn) {
-      const storedCart = localStorage.getItem("cart_${user.id_participant}");
-      const cart = storedCart ? JSON.parse(storedCart) : [];
-      const storedCartId = localStorage.getItem("currentCartId");
-      // Vérifier si un cartId existe, sinon en créer un nouveau
-      const cartId = storedCartId ? parseInt(storedCartId) : generateUniqueCartId();
-      localStorage.setItem("currentCartId", cartId.toString()); // Garder le cartId inchangé
+    if (!isLoggedIn) {
+      setShowLoginMenu(true);
+      return;
+    }
   
-      // Ajouter la session au panier
+    if (!user) return;
+  
+    try {
+      const cartKey = `cart_${user.id_participant}`;
+      const storedCart = localStorage.getItem(cartKey);
+      const cart = storedCart ? JSON.parse(storedCart) : [];
+      
       const newCartItem = {
-        cartId, // Utiliser le cartId existant ou généré
-        action: "demander_devis", // Par défaut, on initialise avec une action, vous pouvez la changer selon votre logique
+        cartId: Date.now(), 
+        action: "demander_devis",
         participant: {
-          id_participant: user?.id_participant,
-          nom_participant: user?.nom_admin || "",
-          email_participant: user?.email || "",
+          id_participant: user.id_participant,
+          nom_participant: user.nom_complet || "",
+          email_participant: user.mail || "",
+          tel_participant: user.telephone || 0
         },
         sessions: [{
           id_session: session.id_session,
-          theme: session.theme || "Thème non disponible",
-          formateur: session.formateur || "Formateur non disponible",
-          code: session.code || "Formateur non disponible",
-        }],
+          theme: session.theme || "",
+          formateur: session.formateur || "",
+          code: session.code || "",
+          date_debut: "", // Add these if needed
+          date_fin: ""
+        }]
       };
   
-      // Vérifier si l'item avec le même `cartId` existe déjà et ajouter la session à celui-ci
-      const existingCartItem = cart.find(item => item.cartId === cartId);
-      if (existingCartItem) {
-        existingCartItem.sessions.push(...newCartItem.sessions); // Ajouter la session à un item existant
-      } else {
-        cart.push(newCartItem); // Ajouter un nouveau panier si aucun n'existe avec ce cartId
-      }
-  
-      // Sauvegarder le panier dans le localStorage
-      localStorage.setItem("cart_${user.id_participant}", JSON.stringify(cart));
-      console.log("Panier mis à jour", cart);
-    } else {
-      setShowLoginMenu(true); // Afficher le LoginMenu si l'utilisateur n'est pas connecté
+      cart.push(newCartItem);
+      localStorage.setItem(cartKey, JSON.stringify(cart));
+      console.log("Session added to cart", newCartItem);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
     }
   };
   
@@ -123,7 +121,7 @@ const Catalogue: React.FC = () => {
   const handleSessionSearchChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setSessionSearchQuery(e.target.value);
   
-  const handleViewPdf = async (sessionId: number, idFichePrg: string | null) => {
+  {/*const handleViewPdf = async (sessionId: number, idFichePrg: string | null) => {
     if (!idFichePrg) {
       alert("Aucune fiche programme disponible.");
       return;
@@ -142,16 +140,16 @@ const Catalogue: React.FC = () => {
       console.error("Erreur lors de la récupération du PDF:", error);
       alert("Impossible de charger la fiche programme.");
     }
-  };
+  };*/}
 
   // Extraire les domaines uniques des formations filtrées
   const domainesUniques = Array.from(new Set(filteredFormations.map((f) => f.domaine)));
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-6xl mx-auto p-4">
       <br /><br /><br /><br /><br />
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold text-teal-700 text-center flex-grow">Catalogue</h1>
+        <h1 className="text-2xl font-bold text-teal-600 text-center flex-grow">Explorez Notre Catalogue !</h1>
         <button onClick={handleSearchToggle} className="bg-white text-[#82b89a] p-2 rounded-full shadow hover:text-black">
           🔍
         </button>
@@ -173,22 +171,22 @@ const Catalogue: React.FC = () => {
       {domainesUniques.length === 0 ? (
         <p className="text-center text-gray-500 px-4 py-2">Aucune formation trouvée.</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 gap-2">
           {domainesUniques.map((domaine) => {
             const formationsDuDomaine = filteredFormations.filter((f) => f.domaine === domaine);
             return (
-              <div key={domaine} className="bg-gray-200 text-black rounded-2xl p-4 shadow-lg transform hover:scale-105 hover:shadow-2xl transition-all cursor-pointer">
+              <div key={domaine} className="bg-gray-100 text-black rounded-1xl p-6 shadow-lg transform hover:scale-10 hover:shadow-2xl transition-all cursor-pointer">
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-xl font-semibold text-teal-600">{domaine}</h3>
+                  <h3 className="text-1l font-semibold text-teal-600">Domaine: {domaine}</h3>
                 </div>
 
                 <div className="mt-4">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="bg-teal-500 text-white">
-                        <th className="p-2 text-left">Thème</th>
-                        <th className="p-2 text-left">Code</th>
-                        <th className="p-2 text-left">Action</th>
+                      <tr className="bg-gray-300/60 text-1l text-gray-500">
+                        <th className="p-1 font-semibold text-left">Thèmes</th>
+                        <th className="p-2 font-semibold text-left">Code</th>
+                        <th className="p-2 font-semibold text-left">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -200,7 +198,7 @@ const Catalogue: React.FC = () => {
                             <td className="p-2 border flex flex-col gap-2">
                             <button
                                 onClick={() => handleAjout(session)}
-                                className="bg-teal-500 text-white py-1 px-3 rounded-md hover:bg-teal-600"
+                                className="bg-teal-500/60 text-white py-1 px-3 rounded-md hover:bg-teal-600"
                                 disabled={isSubmitting}
                               >
                                 {isSubmitting ? "En cours..." : "Ajouter au panier"}

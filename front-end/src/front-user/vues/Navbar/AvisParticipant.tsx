@@ -71,10 +71,8 @@ const AvisParticipant = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-    
-    
         try {
-            const response = await axios.post(
+            await axios.post(
                 `${import.meta.env.VITE_APP_API_URL}/apiUser/avisParticipant`,
                 {
                     id_participant: idParticipant,
@@ -90,6 +88,7 @@ const AvisParticipant = () => {
             alert("Évaluation envoyée !");
         } catch (error) {
             console.error("Erreur lors de l'envoi :", error);
+            alert("Echec de l'envoi de votre Évaluation  !");
             if (axios.isAxiosError(error)) {
                 console.error("Détails de l'erreur :", error.response?.data);
             }

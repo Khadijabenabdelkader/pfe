@@ -16,6 +16,7 @@ import DemanderFormation from "./vues/Navbar/DemanderFormation.tsx";
 import Contact from "./vues/Footer.tsx";
 import { AuthProvider } from "./vues/Context/AuthProviderUser";
 import ResetPasswordPage from "./vues/ResetPasswordPage.tsx";
+import References from "./vues/Navbar/references.tsx";
 const AppUser = () => {
   return (
 
@@ -45,7 +46,7 @@ const AppUser = () => {
             <Route path="/demander_formation" element={<DemanderFormation />} />
             <Route path="/Contact" element={<Contact />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
-
+            <Route path="/references" element={<References />} />
           </Routes>
           <hr />
           <Footer />

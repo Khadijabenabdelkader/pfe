@@ -25,7 +25,7 @@ const stockerAvis = (req, res) => {
     } = req.body;
 
     const query = `
-        INSERT INTO avis_participant 
+        INSERT INTO avis 
         (id_participant, id_session, note, commentaire, adaptation_programme_vie_pro, 
         moyens_pedagogiques_utilises, convenance_horaires_formation, apports_niveau_professionnel, 
         qualite_documentation_distribuee, maitrise_globale_sujets_presentes, traitement_exemples_travail, 

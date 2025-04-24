@@ -58,6 +58,7 @@ const demanderFormationRoute = require('./Routes/User/demanderFormationRoute');
 const AvisFormateurRoute = require('./Routes/User/AvisFormateurRoute');
 const CalendrierFormationRoute = require('./Routes/User/CalendrierFormationRoute');
 // Routes admin
+
 app.use('/apiAdmin/catalogue',catalogueR);
 app.use('/apiAdmin', formateurRoutes);
 app.use('/apiAdmin/formations', formationRoutes);

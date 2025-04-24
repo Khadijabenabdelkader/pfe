@@ -91,7 +91,7 @@ const Calendrier: React.FC = () => {
   
   return (
     <div className="App">
-      <h1 className="text-2xl text-center text-teal-500 font-bold mb-4">Calendrier des événements</h1>
+      <h1 className="text-2xl text-left text-gray-500 font-semibold mb-4">Marquez vos événements... </h1>
       <FullCalendar
         plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"

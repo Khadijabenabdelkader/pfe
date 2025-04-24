@@ -145,19 +145,13 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;*/}
+
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { IonIcon } from "@ionic/react";
 import { 
-  personOutline, 
-  cartOutline,
-  logoFacebook,
-  mailOutline,
-  callOutline,
-  logoLinkedin,
-  fishOutline,
-  menuOutline,
-  closeOutline
+  personOutline, cartOutline,logoFacebook,mailOutline,  shieldCheckmarkOutline ,
+  callOutline,logoLinkedin,fishOutline,menuOutline,closeOutline
 } from "ionicons/icons";
 import logo from "/image.png";
 import LoginMenu from "./LoginMenu";
@@ -190,6 +184,7 @@ const Navbar: React.FC = () => {
     { name: "Phone", icon: callOutline, link: "tel:73467357", text: "73 46 73 57" },
     { name: "LinkedIn", icon: logoLinkedin, link: "https://www.linkedin.com/in/sac-consulting-35544b135/", text: "Notre LinkedIn" },
     { name: "Viadeo", icon: fishOutline, link: "http://www.viadeo.com/p/0021co5qvdaukcah", text: "Notre Viadeo" },
+    { name: "Admin", icon: shieldCheckmarkOutline, link: "/Admin", text: "Espace Administrateur" },
   ];
 
   const handleImageClick = () => {
@@ -231,21 +226,20 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 w-full z-50">
+   <div className="fixed top-0 left-0 w-full z-30">
   {/* Social Media Panel */}
-  <div className="bg-white shadow-sm h-10 flex items-center justify-left relative z-20">
+  <div className="bg-white shadow-sm h-8 flex items-center justify-between relative z-20">
+    {/* Partie gauche - Réseaux sociaux */}
     <div className="flex items-center space-x-8 px-10">
-      {socialLinks.map((social) => (
+      {socialLinks.slice(0, -1).map((social) => ( // On prend tous les éléments sauf le dernier (Admin)
         <div 
           key={social.name}
           className="relative group"
           onMouseEnter={() => setHoveredItem(social.name)}
           onMouseLeave={() => setHoveredItem(null)}
         >
-          <a 
-            href={social.link} 
-            target="_blank" 
-            rel="noopener noreferrer"
+          <Link 
+            to={social.link} 
             className="flex flex-col items-center text-gray-600 hover:text-teal-500 transition-colors duration-300"
           >
             <IonIcon icon={social.icon} className="text-xl" />
@@ -254,15 +248,36 @@ const Navbar: React.FC = () => {
                 {social.text}
               </span>
             )}
-          </a>
+          </Link>
         </div>
       ))}
     </div>
+    
+    {/* Partie droite - Lien Admin */}
+    <div className="pr-10">
+      <div 
+        className="relative group"
+        onMouseEnter={() => setHoveredItem("Admin")}
+        onMouseLeave={() => setHoveredItem(null)}
+      >
+        <Link 
+          to={socialLinks[socialLinks.length - 1].link} // On prend le dernier élément (Admin)
+          className="flex flex-col items-center text-gray-600 hover:text-teal-500 transition-colors duration-300"
+        >
+          <IonIcon icon={shieldCheckmarkOutline} className="text-xl" />
+          {hoveredItem === "Admin" && (
+            <span className="absolute top-10 right-0 z-30 text-xs bg-teal-400/80 text-gray-800 px-2 py-1 rounded whitespace-nowrap shadow-sm border border-gray-200">
+              {socialLinks[socialLinks.length - 1].text}
+            </span>
+          )}
+        </Link>
+      </div>
+    </div>
+ 
+
   </div>
 
-  {/* Navbar - avec z-index inférieur */}
   <div className="bg-white bg-opacity-90 backdrop-blur-lg shadow-md relative z-10"><div className="flex justify-between items-center h-12 md:h-20 relative">
-            {/* Logo */}
             <div className="h-full flex items-center pl-8 md:pl-10">
               <img
                 src={logo}
@@ -272,7 +287,6 @@ const Navbar: React.FC = () => {
               />
             </div>
 
-            {/* Mobile Menu Icon */}
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="md:hidden text-2xl text-gray-700 px-4"
@@ -280,7 +294,6 @@ const Navbar: React.FC = () => {
               <IonIcon icon={isMobileMenuOpen ? closeOutline : menuOutline} />
             </button>
 
-            {/* Links */}
             <ul className={`md:flex h-full items-stretch ${
               isMobileMenuOpen ? "block absolute top-full left-0 right-0 bg-white shadow-lg" : "hidden"
             }`}>
@@ -303,7 +316,6 @@ const Navbar: React.FC = () => {
                   </Link>
                 </li>
               ))}
-              {/* Bouton Demande de Formation */}
               <li className="h-full flex items-center">
                 <button
                   onClick={handleRequestFormationClick}
@@ -362,7 +374,6 @@ const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Add spacing to push content below the fixed header */}
       <div className="h-28 md:h-32"></div>
       
       {showLoginMenu && !user && <LoginMenu onClose={() => setShowLoginMenu(false)} />}

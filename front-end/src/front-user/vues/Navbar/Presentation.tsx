@@ -1,6 +1,4 @@
-
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
 import img from "/enfavet.png";
@@ -30,6 +28,31 @@ const ObservableCountUp = ({ end, duration = 2, ...props }) => {
   );
 };
 
+// Composant pour l'animation de texte
+const AnimatedText = ({ children, delay = 0 }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const [ref, inView] = useInView({
+    triggerOnce: true,
+    threshold: 0.1,
+  });
+
+  useEffect(() => {
+    if (inView) {
+      const timer = setTimeout(() => setIsVisible(true), delay * 300);
+      return () => clearTimeout(timer);
+    }
+  }, [inView, delay]);
+
+  return (
+    <div 
+      ref={ref}
+      className={`transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+    >
+      {children}
+    </div>
+  );
+};
+
 const Presentation: React.FC = () => {
   const [values] = useState({
     plansDeFormation: 300,
@@ -42,7 +65,6 @@ const Presentation: React.FC = () => {
     { name: "CATALOGUE", link: "/Catalogue" },
     { name: "Calendrier", link: "/Calendrier" },
   ]
-
 
   const entreprises = [
     { 
@@ -87,34 +109,32 @@ const Presentation: React.FC = () => {
         <div className="text-center text-emrald-500 pt-20 pb-12 px-6">
         
           <div className="fixed inset-0 z-[-1] overflow-hidden">
- <br/><br/>
-  <div className="h-[calc(130vh-80px)] blur-sm w-full bg-black flex items-center justify-center p-1 z-[-1]">
-    <img 
-      src={image} 
-      alt=""
-      className="h-full w-auto max-w-none filter"
-      style={{ minWidth: '100vw' }}
-    />
-  </div>
-</div>
-          
-            {/*<div className="text-4xl font-semibold text-center my-0 text-emerald-500/80 mb-8">*/}
-            <div className="text-4xl font-semibold text-center text-emerald-500/80 mt-[-5.5rem] mb-4">           
-
-           
-            <h1 className="text-6xl backdrop-blur-sm bg-black/5 font-bold text-center  text-white/100 mb-20  rounded-lg ">
-                Sac-consulting
-              </h1><br/>
-              <p className="font-light text-2xl text-white mx-auto backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed">
-    Découvrez des services sur-mesure pour votre entreprise dans les domaines de la formation, 
-    la certification et la mise à niveau des compétences. Notre engagement : accompagner 
-    le développement durable de votre performance organisationnelle, renforcer votre avantage 
-    concurrentiel et soutenir votre croissance rentable à long terme.
-</p>
+            <br/><br/>
+            <div className="h-[calc(130vh-80px)] blur-sm w-full bg-black flex items-center justify-center p-1 z-[-1]">
+              <img 
+                src={image} 
+                alt=""
+                className="h-full w-auto max-w-none filter"
+                style={{ minWidth: '100vw' }}
+              />
             </div>
+          </div>
+          
+          <div className="text-4xl font-semibold text-center text-emerald-500/80 mt-[-5.5rem] mb-4">           
+            <h1 className="text-6xl backdrop-blur-sm bg-black/5 font-bold text-center  text-white/100 mb-20 rounded-lg">
+                Sac-consulting
+            </h1>
+            <br/>
+            <p className="font-light text-2xl text-white mx-auto backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed">
+              Découvrez des services sur-mesure pour votre entreprise dans les domaines de la formation, 
+              la certification et la mise à niveau des compétences. Notre engagement : accompagner 
+              le développement durable de votre performance organisationnelle, renforcer votre avantage 
+              concurrentiel et soutenir votre croissance rentable à long terme.
+            </p>
+          </div>
           
           <div className="relative mt-8">
-            <div className="rounded-xl overflow-hidden shadow-lg">
+            <div className="rounded-xl overflow-hidden shadow-lg  w-screen relative left-1/2 right-1/2 mx-[-50vw]">
               <div className="bg-emerald-400/70 backdrop-blur-sm p-6">
                 <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                   {[
@@ -124,8 +144,7 @@ const Presentation: React.FC = () => {
                     { title: "Clients", value: values.clients },
                     { title: "Etudes Man", value: values.etudesMan },
                   ].map((item) => (
-                    <div key={item.title}  className="h-32 flex flex-col items-center justify-center" >
-                     
+                    <div key={item.title} className="h-32 flex flex-col items-center justify-center">
                       <p className="text-white text-3xl font-bold">
                         <ObservableCountUp end={item.value} duration={3} />
                       </p>
@@ -137,7 +156,7 @@ const Presentation: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white/90 backdrop-blur-md p-8 border-t border-emerald-100">
+              <div className="bg-white/90 backdrop-blur-md p-8 border-t border-emerald-100  ">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                   {entreprises.map((entreprise) => (
                     <div 
@@ -166,8 +185,8 @@ const Presentation: React.FC = () => {
               </div>
             </div>
           </div>
-
-          <div className="bg-white/90 backdrop-blur-sm p-8 border-t border-emerald-100 mt-8 relative overflow-hidden">
+          <div className="space-y-0">
+          <div className="bg-white/90 backdrop-blur-sm p-8 border-t border-emerald-100 mt-8 relative overflow-hidden w-screen relative left-1/2 right-1/2 mx-[-50vw]">
             <div className="w-full h-64 mb-8 overflow-hidden rounded-t-lg">
               <img 
                 src="/presUI.png" 
@@ -175,14 +194,12 @@ const Presentation: React.FC = () => {
                 className="w-full h-full object-cover object-center"
               />
             </div>
-
+            <AnimatedText delay={0}>
             <h2 className="text-4xl font-semibold text-center my-12 text-emerald-600/80 mb-8">
-              Nos Prestations Remboursables par l'état jusqu'à
-              <p className="text-emerald-600/80 text-3xl font-bold mt-4">
-                <ObservableCountUp end={70} duration={3} />% !
-              </p>  
+              Nos Prestations Remboursables par l'état jusqu'à 70 % !
             </h2>
-            
+            </AnimatedText>
+            <AnimatedText delay={0.5}>
             <div className="flex flex-wrap justify-center gap-8">
               {[
                 "✔️ Mise à niveau",
@@ -196,21 +213,23 @@ const Presentation: React.FC = () => {
                   {item}
                 </h3>
               ))}
-            </div>
+            </div></AnimatedText>
           </div>
 
-          <div className="bg-white/90 backdrop-blur-md p-8 border-t border-emerald-100 mt-8">
-          <div className="w-full h-64 mb-8 overflow-hidden rounded-t-lg">
+          <div className="bg-white/90 backdrop-blur-md p-8 border-t border-emerald-100 mt-8 w-screen relative left-1/2 right-1/2 mx-[-50vw] ">
+            <div className="w-full h-64 mb-8 overflow-hidden rounded-t-lg">
               <img 
                 src="/ui2.jpg" 
                 alt="Nos prestations" 
                 className="w-full h-full object-cover object-center"
               />
             </div>
+            <AnimatedText delay={0}>
             <h2 className="text-4xl font-semibold text-center my-12 text-emerald-600/80 mb-8">
               Nos Points forts au niveau de la formation
             </h2>
-            
+            </AnimatedText>
+            <AnimatedText delay={0.5}>
             <div className="flex flex-wrap justify-center gap-8">
               {[
                 "✔️ Planification",
@@ -223,57 +242,103 @@ const Presentation: React.FC = () => {
                 </h3>
               ))}
             </div>
-          </div>
+            </AnimatedText>
+          </div></div>
           
-
-          <div className="bg-white/90 backdrop-blur-md p-8 border-t border-emerald-100 mt-8">
-          <div className="w-full h-64 mb-8 overflow-hidden rounded-t-lg">
-              <img 
-                src="/catalogueUI.png" 
-                alt="Nos prestations" 
-                className="w-full h-full object-cover object-center"
-              />
-            </div>
-            <h2 className="text-4xl font-semibold text-center my-12 text-emerald-600/80 mb-8">
-              Explorez notre Catalogue !            </h2>
-            
-                      <a 
-                        href="/catalogue" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-emerald-600 hover:text-emerald-800 mt-1 hover:underline"
-                      >
-                        Consultez le catalogue
-                      </a>
+          {/* Section Catalogue modifiée */}
+          <div className="space-y-0"> {/* Supprime l'espace entre les sections */}
+  
+  {/* Section Catalogue */}
+  <div className="bg-white/90 backdrop-blur-md p-8 border-t border-emerald-100 w-screen relative left-1/2 right-1/2 mx-[-50vw] ">
+    <div className="flex flex-col md:flex-row items-stretch gap-8 h-full"> {/* Utilisation de items-stretch */}
+      {/* Image à gauche - pleine hauteur */}
+      <div className="w-full md:w-1/2 h-96 overflow-hidden rounded-lg"> {/* Hauteur augmentée */}
+        <img 
+          src="/catalogueUI.png" 
+          alt="Catalogue" 
+          className="w-full h-full object-cover object-center"
+        />
+      </div>
+      
+      {/* Texte à droite - pleine hauteur */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center "> {/* Centrage vertical */}
+        <AnimatedText delay={0}>
+          <h2 className="text-4xl font-semibold text-emerald-600/80 mb-4 text-center md:text-left">
+            Explorez notre Catalogue !
+          </h2>
+        </AnimatedText>
+        <AnimatedText delay={0.5}>
+          <p className="text-lg text-gray-600 mb-6 text-center md:text-left">
+            Explorez notre catalogue varié, avec des formations adaptées à différents domaines et thèmes. 
+            Chaque programme est conçu pour répondre à vos besoins et vous aider à développer vos compétences.
+          </p>
+        </AnimatedText>
+        <AnimatedText delay={1}>
+          <div className="text-center md:text-left">
+            <a 
+              href="/catalogue" 
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-6 py-2 text-teal-600 hover:text-teal-800 transition-colors border border-teal-600 rounded-lg hover:bg-teal-50"
+            >
+              Consultez le catalogue
+            </a>
           </div>
-          <div className="bg-white/90 backdrop-blur-md p-8 border-t border-emerald-100 mt-8">
-          <div className="w-full h-64 mb-8 overflow-hidden rounded-t-lg">
-              <img 
-                src="/calendarUI.png" 
-                alt="Nos prestations" 
-                className="w-full h-full object-cover object-center"
-              />
-            </div>
-            <h2 className="text-4xl font-semibold text-center my-12 text-emerald-600/80 mb-8">
-              Trouvez plein de formations dans notre Calendrier !            </h2>
-            
-              <a 
-                        href="/calendrier"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-emerald-600 hover:text-emerald-800 mt-1 hover:underline"
-                      >
-                        Consultez la calendrier
-                      </a>
-          </div><br/><br/><br/><br/>
-          < ul className=" mt-auto w-full">
-      <Footer/>
-      </ul>
+        </AnimatedText>
+      </div>
+    </div>
+  </div>
 
+  {/* Section Calendrier - collée à la section Catalogue */}
+  <div className="bg-white/90 backdrop-blur-md p-8 border-T border-emerald-100 w-screen relative left-1/2 right-1/2 mx-[-50vw]">
+    <div className="flex flex-col md:flex-row items-stretch gap-4 h-full">
+      {/* Texte à gauche - pleine hauteur */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center">
+        <AnimatedText delay={0}>
+          <h2 className="text-4xl font-semibold text-emerald-600/80 mb-4 text-center md:text-left">
+            Trouvez plein de formations dans notre Calendrier !
+          </h2>
+        </AnimatedText>
+        <AnimatedText delay={0.5}>
+          <p className="text-lg text-gray-600 mb-6 text-center md:text-left">
+            Parcourez notre calendrier interactif pour découvrir toutes les formations à venir,
+            planifiez votre participation et inscrivez-vous en quelques clics.
+            Des sessions régulièrement mises à jour pour répondre à vos besoins.
+          </p>
+        </AnimatedText>
+        <AnimatedText delay={1}>
+          <div className="text-center md:text-left">
+            <a 
+              href="/calendrier"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-6 py-2 text-teal-600 hover:text-teal-800 transition-colors border border-teal-600 rounded-lg hover:bg-teal-50"
+            >
+              Consultez le calendrier
+            </a>
+          </div>
+        </AnimatedText>
+      </div>
+      
+      {/* Image à droite - pleine hauteur */}
+      <div className="w-full md:w-1/2 h-96 overflow-hidden rounded-lg">
+        <img 
+          src="/calendarUI.png" 
+          alt="Calendrier des formations" 
+          className="w-full h-full object-cover object-center"
+        />
+      </div>
+    </div>
+  </div>
+
+</div>
+
+          <br/><br/><br/>
+          <ul className="mt-auto w-full w-screen relative left-1/2 right-1/2 mx-[-50vw]">
+            <Footer/>
+          </ul>
         </div> 
-     </div>
-     
-     
+      </div>
     </div>
   );
 };

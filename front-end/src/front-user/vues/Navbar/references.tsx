@@ -67,9 +67,9 @@ const References = () => {
   ];
 
   return (
-    <section className="bg-white/90 backdrop-blur-md py-20 px-8 sm:px-10 lg:px-8 border-t border-emerald-100">
+    <section className="bg-white/90 backdrop-blur-md py-10 px-8 sm:px-10 lg:px-8 border-t border-emerald-100">
       <div className="max-w-7xl mx-auto">
-        <br/><br/>
+       
         <h2 className="text-2xl font-bold text-teal-600 text-center flex-grow">NOS REFERENCES</h2>
         <br/><br/>
         {/* Première ligne */}

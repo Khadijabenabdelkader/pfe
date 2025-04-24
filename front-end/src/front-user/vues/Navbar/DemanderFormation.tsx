@@ -80,7 +80,7 @@ const DemanderFormation = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6 bg-white border rounded-lg shadow-md"> {/* Changé de max-w-lg à max-w-4xl */}
-    <div className="py-20"> 
+    <div className="py-3"> 
       <h2 className="text-2xl text-teal-600 font-bold mb-6 text-center">Demande de Formation Personnalisée</h2> {/* Texte agrandi et centré */}
         
       {/* Affichage de l'erreur */}

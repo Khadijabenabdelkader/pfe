@@ -120,7 +120,7 @@ const Presentation: React.FC = () => {
             </div>
           </div>
           
-          <div className="text-4xl font-semibold text-center text-emerald-500/80 mt-[-5.5rem] mb-4">           
+          <div className="text-4xl font-semibold text-center text-emerald-500/80 mt-[-5.5rem] mb-4 ">           
             <h1 className="text-6xl backdrop-blur-sm bg-black/5 font-bold text-center  text-white/100 mb-20 rounded-lg">
                 Sac-consulting
             </h1>
@@ -133,10 +133,10 @@ const Presentation: React.FC = () => {
             </p>
           </div>
           
-          <div className="relative mt-8">
+          <div className="relative mt-8 ">
             <div className="rounded-xl overflow-hidden shadow-lg  w-screen relative left-1/2 right-1/2 mx-[-50vw]">
-              <div className="bg-emerald-400/70 backdrop-blur-sm p-6">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+              <div className="bg-emerald-400/70 backdrop-blur-sm p-6 ">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-0">
                   {[
                     { value: values.plansDeFormation, title: "Plans de Formation" },
                     { title: "Années d'expérience", value: values.anneesExperience },
@@ -156,7 +156,7 @@ const Presentation: React.FC = () => {
                 </div>
               </div>
 
-              <div className="bg-white/90 backdrop-blur-md p-8 border-t border-emerald-100  ">
+             {/*} <div className="bg-white/90 backdrop-blur-md p-8 border-t border-emerald-100  ">
                 <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
                   {entreprises.map((entreprise) => (
                     <div 
@@ -182,9 +182,10 @@ const Presentation: React.FC = () => {
                     </div>
                   ))}
                 </div>
-              </div>
+              </div>*/}
             </div>
           </div>
+          
           <div className="space-y-0">
           <div className="bg-white/90 backdrop-blur-sm p-8 border-t border-emerald-100 mt-8 relative overflow-hidden w-screen relative left-1/2 right-1/2 mx-[-50vw]">
             <div className="w-full h-64 mb-8 overflow-hidden rounded-t-lg">

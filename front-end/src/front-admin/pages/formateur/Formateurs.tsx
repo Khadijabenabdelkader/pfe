@@ -168,9 +168,9 @@ const Formateurs: React.FC = () => {
                 </div>
               </div>
 
-              {(user.nom_acces === "super_admin" || user.nom_acces === "editeur formateur") && (
+              {(user.nom_acces === "super_admin"  || user.nom_acces === "editeur formateur")  && (
                 <button
-                  className="px-3 py-1 bg-teal-500 text-white rounded-lg hover:bg-tela-800 text-sm"
+                  className="px-6 py-1 bg-teal-500/80 text-white rounded-lg hover:bg-tela-800 text-sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleEditClick(formateur.id_formateur);
@@ -180,7 +180,7 @@ const Formateurs: React.FC = () => {
                 </button>
               )}
 
-              {user.nom_acces === "super_admin" && (
+              {(user.nom_acces === "super_admin "  || user.nom_acces === "editeur formateur") && (
                 <button
                   className="px-3 py-1 bg-gray-400 text-white rounded-lg hover:bg-red-600 text-sm"
                   onClick={(e) => {

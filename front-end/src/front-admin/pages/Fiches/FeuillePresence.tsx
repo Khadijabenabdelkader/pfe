@@ -73,7 +73,8 @@ const FeuillePresence = () => {
   const [showParticipantColumns, setShowParticipantColumns] = useState({
     CIN: true,
     directionService: true,
-    entreprise: true
+    entreprise: true,
+    mail: true
   });
   useEffect(() => {
     axios.get(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/calendrierDetails`)
@@ -318,8 +319,7 @@ const FeuillePresence = () => {
   
   return (
     <div className="container mx-auto p-4 font-sans">
-
-      <h1 className="text-2xl text-teal-600 font-bold text-center mb-6">Feuille de Présence</h1>
+      <h1 className="text-2xl font-bold text-center mb-6">Feuille de Présence</h1>
       
       {/* Section Crédit d'impôt et Droits de tirage */}
       <div className="mb-6 p-4 border rounded">
@@ -539,6 +539,7 @@ const FeuillePresence = () => {
                 <th className="border p-2">n°</th>
                 <th className="border p-2">Nom et prénom</th>
                 {showParticipantColumns.CIN && <th className="border p-2">n° CIN</th>}
+                {showParticipantColumns.mail && <th className="border p-2">Mail</th>}
                 {showParticipantColumns.directionService && <th className="border p-2">Direction / service</th>}
                 {showParticipantColumns.entreprise && <th className="border p-2">Entreprise</th>}
                 {selectedTheme && renderEmargementColumns()}
@@ -569,6 +570,20 @@ const FeuillePresence = () => {
                         onChange={(e) => {
                           const updatedParticipants = [...participants];
                           updatedParticipants[index].CIN = e.target.value;
+                          setParticipants(updatedParticipants);
+                        }} 
+                        className="w-full p-1 border rounded"
+                      />
+                    </td>
+                  )}
+                  {showParticipantColumns.mail && (
+                    <td className="border p-2">
+                      <input 
+                        type="mail" 
+                        value={participant.mail} 
+                        onChange={(e) => {
+                          const updatedParticipants = [...participants];
+                          updatedParticipants[index].mail = e.target.value;
                           setParticipants(updatedParticipants);
                         }} 
                         className="w-full p-1 border rounded"
@@ -689,7 +704,7 @@ const FeuillePresence = () => {
       <div className="flex justify-center">
         <button 
           onClick={handleFormSubmit} 
-          className="px-6 py-3 bg-teal-500 text-white rounded hover:bg-green-600"
+          className="px-6 py-3 bg-teal-500 text-white rounded hover:bg-teal-300"
         >
           Enregistrer la feuille de présence
         </button>

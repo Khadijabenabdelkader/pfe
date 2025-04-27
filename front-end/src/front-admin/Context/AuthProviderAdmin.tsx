@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Déduire l'état de connexion (isLoggedIn)
   const isLoggedIn = user !== null && user.token !== undefined;
 
-  // Vérifier l'utilisateur lors du chargement du composant
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
 
@@ -41,7 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(null); // Si l'utilisateur est mal formé, réinitialiser à null
       }
     } else {
-      setUser(null); // Aucun utilisateur trouvé dans localStorage
+      setUser(null); 
     }
 
     setLoading(false); // Fin du chargement après avoir vérifié les données

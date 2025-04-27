@@ -112,7 +112,7 @@ const getHistoriqueFormations = (req, res) => {
           s.theme, 
           s.code, 
           f.domaine, 
-          s.etat, 
+          s.etat, s.date_debut, s.date_fin,
           s.type_session, 
           fp.chemin AS fiche_prg  -- Récupère le chemin de la fiche du formateur
       FROM session s
@@ -133,7 +133,6 @@ const getHistoriqueFormations = (req, res) => {
           return res.status(404).json({ message: 'Aucune formation historique trouvée.' });
       }
 
-      // Pour chaque session, vérifier s'il y a des fichiers à renvoyer
       results.forEach(session => {
         // Préparer les URLs des fichiers PDF
         session.fiche_prg = session.fiche_prg ? `${process.env.BASE_URL}/uploads/${session.fiche_prg}` : null;

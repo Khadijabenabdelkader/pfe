@@ -48,8 +48,6 @@ const Catalogue: React.FC = () => {
         setError(err.message);
         setLoading(false);
       });
-
-    
   }, []);
 
   if (loading) return <p className="text-center text-gray-600">Chargement...</p>;
@@ -115,32 +113,8 @@ const Catalogue: React.FC = () => {
       console.error("Error adding to cart:", error);
     }
   };
-  
-
-
   const handleSessionSearchChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setSessionSearchQuery(e.target.value);
-  
-  {/*const handleViewPdf = async (sessionId: number, idFichePrg: string | null) => {
-    if (!idFichePrg) {
-      alert("Aucune fiche programme disponible.");
-      return;
-    }
-
-    try {
-      const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/apiUser/formations/fiche/${idFichePrg}`);
-      if (response.data && response.data.chemin) {
-
-        setSelectedPdf(response.data.chemin);
-        setSelectedSessionId(sessionId); // Stocker l'ID de la session sélectionnée
-        console.log(response.data)      } else {
-        alert("Fiche programme non disponible.");
-      }
-    } catch (error) {
-      console.error("Erreur lors de la récupération du PDF:", error);
-      alert("Impossible de charger la fiche programme.");
-    }
-  };*/}
 
   // Extraire les domaines uniques des formations filtrées
   const domainesUniques = Array.from(new Set(filteredFormations.map((f) => f.domaine)));
@@ -184,9 +158,9 @@ const Catalogue: React.FC = () => {
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="bg-gray-300/60 text-1l text-gray-500">
-                        <th className="p-1 font-semibold text-left">Thèmes</th>
-                        <th className="p-2 font-semibold text-left">Code</th>
-                        <th className="p-2 font-semibold text-left">Action</th>
+                        <th className="p-3 font-semibold text-left">Thèmes</th>
+                        <th className="p-3 font-semibold text-left">Code</th>
+                        <th className="p-3 font-semibold text-left">Action</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -195,19 +169,14 @@ const Catalogue: React.FC = () => {
                           <tr key={session.id_session} className="hover:bg-gray-100">
                             <td className="p-2 border">{session.theme}</td>
                             <td className="p-2 border">{session.code}</td>
-                            <td className="p-2 border flex flex-col gap-2">
+                            <td className="p-2 border  text-right gap-3">
                             <button
                                 onClick={() => handleAjout(session)}
-                                className="bg-teal-500/60 text-white py-1 px-3 rounded-md hover:bg-teal-600"
+                                className="bg-teal-500/80 text-white py-1 px-3 rounded-md hover:bg-teal-600"
                                 disabled={isSubmitting}
                               >
                                 {isSubmitting ? "En cours..." : "Ajouter au panier"}
                               </button>
-                              
-
-            {/* Affichage du PDF uniquement pour la session sélectionnée */}
-           
-
                             </td>
                           </tr>
                         ))

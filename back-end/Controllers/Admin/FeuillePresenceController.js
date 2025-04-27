@@ -104,7 +104,7 @@ const addParticipantAndInsertPresence = async (req, res) => {
       // Insertion feuille de présence
       const presenceResult = await new Promise((resolve, reject) => {
         db.query(
-          `INSERT INTO feuille_presence SET ?`,
+          'INSERT INTO feuille_presence SET ?',
           {
             id_calendrier: idCalendrier,
             credit_impot: creditImpôt ? 1 : 0,
@@ -167,7 +167,7 @@ const addParticipantAndInsertPresence = async (req, res) => {
           // Insertion nouveau participant
           const result = await new Promise((resolve, reject) => {
             db.query(
-              `INSERT INTO participant SET ?`,
+              'INSERT INTO participant SET ?',
               {
                 nom_complet: participant.nomComplet,
                 mail: participant.mail || null,

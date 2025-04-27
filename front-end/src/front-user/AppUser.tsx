@@ -18,8 +18,9 @@ import { AuthProvider } from "./vues/Context/AuthProviderUser";
 import ResetPasswordPage from "./vues/ResetPasswordPage.tsx";
 import References from "./vues/Navbar/references.tsx";
 const AppUser = () => {
+  
   return (
-
+    
       <>
       <AuthProvider>
           <Navbar />

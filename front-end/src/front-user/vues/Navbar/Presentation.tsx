@@ -246,23 +246,17 @@ const Presentation: React.FC = () => {
             </AnimatedText>
           </div></div>
           
-          {/* Section Catalogue modifiée */}
-          <div className="space-y-0"> {/* Supprime l'espace entre les sections */}
-  
-  {/* Section Catalogue */}
+          <div className="space-y-0"> 
   <div className="bg-white/90 backdrop-blur-md p-8 border-t border-emerald-100 w-screen relative left-1/2 right-1/2 mx-[-50vw] ">
-    <div className="flex flex-col md:flex-row items-stretch gap-8 h-full"> {/* Utilisation de items-stretch */}
-      {/* Image à gauche - pleine hauteur */}
-      <div className="w-full md:w-1/2 h-96 overflow-hidden rounded-lg"> {/* Hauteur augmentée */}
+    <div className="flex flex-col md:flex-row items-stretch gap-8 h-full"> 
+      <div className="w-full md:w-1/2 h-96 overflow-hidden rounded-lg"> 
         <img 
           src="/catalogueUI.png" 
           alt="Catalogue" 
           className="w-full h-full object-cover object-center"
         />
       </div>
-      
-      {/* Texte à droite - pleine hauteur */}
-      <div className="w-full md:w-1/2 flex flex-col justify-center "> {/* Centrage vertical */}
+      <div className="w-full md:w-1/2 flex flex-col justify-center "> 
         <AnimatedText delay={0}>
           <h2 className="text-4xl font-semibold text-emerald-600/80 mb-4 text-center md:text-left">
             Explorez notre Catalogue !
@@ -289,11 +283,8 @@ const Presentation: React.FC = () => {
       </div>
     </div>
   </div>
-
-  {/* Section Calendrier - collée à la section Catalogue */}
   <div className="bg-white/90 backdrop-blur-md p-8 border-T border-emerald-100 w-screen relative left-1/2 right-1/2 mx-[-50vw]">
     <div className="flex flex-col md:flex-row items-stretch gap-4 h-full">
-      {/* Texte à gauche - pleine hauteur */}
       <div className="w-full md:w-1/2 flex flex-col justify-center">
         <AnimatedText delay={0}>
           <h2 className="text-4xl font-semibold text-emerald-600/80 mb-4 text-center md:text-left">
@@ -320,8 +311,6 @@ const Presentation: React.FC = () => {
           </div>
         </AnimatedText>
       </div>
-      
-      {/* Image à droite - pleine hauteur */}
       <div className="w-full md:w-1/2 h-96 overflow-hidden rounded-lg">
         <img 
           src="/calendarUI.png" 
@@ -331,9 +320,7 @@ const Presentation: React.FC = () => {
       </div>
     </div>
   </div>
-
 </div>
-
           <br/><br/><br/>
           <ul className="mt-auto w-full w-screen relative left-1/2 right-1/2 mx-[-50vw]">
             <Footer/>

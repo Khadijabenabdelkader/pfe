@@ -30,7 +30,6 @@ const AppAdmin= () => {
 
   if (loading) {
     return <Loader />;
-     // Afficher un loader si les données sont en cours de chargement
   }
   return (
         <DefaultLayout>
@@ -65,9 +64,6 @@ const AppAdmin= () => {
                     </>
                   }
                 />
-
-
-
                     <Route
                       path="/NewAdmin"
                       element={

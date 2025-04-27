@@ -9,7 +9,7 @@ interface Session {
   domaine: string;
   duree: number;
   date_debut: string;
-  date_fin: string;
+  date_fin: Date;
   etat: string;
   type_session: string;
   fiche_prg: string;
@@ -31,7 +31,6 @@ const HistoriqueFormation: React.FC = () => {
         }
   
 
-    // Requête API pour récupérer l'historique des formations réalisées par un formateur
     axios.get(`${import.meta.env.VITE_APP_API_URL}/apiUser/historique-formations/${userData.id_formateur}`)
       .then(response => {
         if (Array.isArray(response.data)) {
@@ -45,14 +44,14 @@ const HistoriqueFormation: React.FC = () => {
         setError('Erreur lors de la récupération des données.');
       })
       .finally(() => setLoading(false));
-  }, []);  // Refaire la requête lorsque l'ID formateur change
+  }, []); 
 
   if (loading) return <p>Chargement des formations...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-2xl font-bold mb-4">Formations à Réaliser</h1>
+<div className="max-w-6xl mx-auto p-5 bg-white shadow-8 rounded-lg">
+<h1 className="text-1xl font-semibold text-gray-600 mb-4">Formations déjà Réalisées</h1>
       {sessions.length > 0 ? (
         <table className="table-auto w-full border-collapse border border-gray-300">
           <thead>
@@ -75,8 +74,8 @@ const HistoriqueFormation: React.FC = () => {
                 <td className="border border-gray-300 px-4 py-2">{session.code}</td>
                 <td className="border border-gray-300 px-4 py-2">{session.domaine}</td>
                 <td className="border border-gray-300 px-4 py-2">{session.duree} jours</td>
-                <td className="border border-gray-300 px-4 py-2">{session.date_debut}</td>
-                <td className="border border-gray-300 px-4 py-2">{session.date_fin}</td>
+                <td className="border border-gray-300 px-4 py-2">{new Date(session.date_debut).toLocaleDateString()}</td>
+                <td className="border border-gray-300 px-4 py-2">{new Date(session.date_fin).toLocaleDateString()}</td>
                 <td className="border border-gray-300 px-4 py-2">{session.etat}</td>
                 <td className="border border-gray-300 px-4 py-2">{session.type_session}</td>
                 <td className="border border-gray-300 px-4 py-2">

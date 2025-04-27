@@ -5,9 +5,9 @@ import Calendrier from './Calendrier';
 import DemandeModification from './DemandeModification';
 import FormationARealise from './FormationARealise';
 import HistoriqueFormation from './HistoriqueFormation';
-
+import { useAuth } from '../Hooks/useAuthUser';
 const ProfilFormateur: React.FC = () => {
-  const [activeContent, setActiveContent] = useState<string>(''); // Gérer le contenu affiché
+  const [activeContent, setActiveContent] = useState<string>('');
   const [formateur, setFormateur] = useState<any>(null); 
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -16,20 +16,16 @@ const ProfilFormateur: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fonction pour vérifier si l'utilisateur est authentifié
     const checkAuthentication = () => {
-      const token = localStorage.getItem('token'); // ou sessionStorage ou cookies, selon votre choix
+      const token = localStorage.getItem('token'); 
 
       if (!token) {
-        navigate('/'); // Redirige vers la page de login si l'utilisateur n'est pas connecté
+        navigate('/'); 
         return;
       }
-
-      // Si un token existe, récupérer les données du formateur à partir de l'API
       fetchFormateurDetails();
     };
 
-    // Récupérer les informations du formateur depuis l'API
     const fetchFormateurDetails = async () => {
       try {
         const userData = JSON.parse(localStorage.getItem("user") || "{}");
@@ -44,18 +40,18 @@ const ProfilFormateur: React.FC = () => {
           },
         });
     
-        setFormateur(response.data);  // Mettre à jour les informations du formateur
+        setFormateur(response.data); 
       } catch (error) {
         console.error("Erreur lors de la récupération des détails du formateur :", error);
       }
     };
     
 
-    checkAuthentication(); // Vérifie si l'utilisateur est connecté et récupère ses détails
+    checkAuthentication();
   }, [navigate]);
 
   const handleButtonClick = (content: string) => {
-    setActiveContent(content); // Définir le contenu actif en fonction du bouton cliqué
+    setActiveContent(content); 
   };
 
   const handlePasswordChange = async () => {
@@ -95,32 +91,58 @@ const ProfilFormateur: React.FC = () => {
   };
 
   if (!formateur) {
-    return <div>Chargement...</div>; // Affiche un message de chargement si les données sont en attente
+    return <div>Chargement...</div>; 
   }
 
   return (
-    <div className="max-w-4xl mx-auto pt-36 p-6 bg-white shadow-lg rounded-lg">
-      <h1 className="text-3xl font-bold text-center text-teal-600 mb-4">
-        Bienvenue dans Sac_Consulting
-      </h1>
+    <div className="max-w-6xl mx-auto pt-5 p-6 bg-white shadow-lg rounded-lg">
+      <h1 className="text-3xl font-semibold text-center text-teal-500 mb-4">
+         {formateur.nom_complet} 
+      </h1><br/>
 
       <div className="space-y-4">
-        <div>
-          <h2 className="text-xl font-semibold">Nom Complet: {formateur.nom_complet}</h2>
-          <p><strong>Téléphone:</strong> {formateur.tel}</p>
-          <p><strong>Email:</strong> {formateur.mail}</p>
-          <p><strong>Adresse:</strong> {formateur.adr || ""}</p>
-          <p><strong>Domaine de Compétences:</strong> {formateur.domaine_de_competences || ""}</p>
-          <p><strong>Domaine de Compétences au niveau d'assistance:</strong> {formateur.domaine_assistance || ""}</p>
-          <p><strong>Thèmes à enseigner:</strong> {formateur.themes_a_enseigner || ""}</p>
-          <p><strong>Nombre de Formations:</strong> {formateur.nb_formations || ""}</p>
-          <p><strong>Nombre d'années d'experience :</strong> {formateur.nb_experience || ""}</p>
-          <p><strong>Nom du Banque :</strong> {formateur.nom_banque || ""}</p>
-          <p><strong>RIB Banque:</strong> {formateur.RIB || ""}</p>
+        <div className="text-1xl text-gray-600 font-semibold">
 
+        <div className="mt-6 text-right">
+  <button
+    onClick={() => handleButtonClick('demandeModification')}
+    className="mt-0 px-6 py-3 bg-white text-teal-500 rounded hover:bg-teal-600 border border-teal-500 hover:text-white transition"
+  >
+    modifier mon profil ✏️
+  </button>
+  {activeContent === 'demandeModification' && (
+    <DemandeModification onClose={() => handleButtonClick('')} />
+  )}
+</div><br/>
+          {/*<h2 className="text-1xl font-semibold">Nom Complet : {formateur.nom_complet}</h2>*/}
+          <div className='flex space-x-4'>
+          
+  <div className='backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed flex-1'>
+    <p className="text-1xl font-semibold">Téléphone: {formateur.tel}</p>
+    <p>Email: {formateur.mail}</p>
+    <p>Adresse: {formateur.adr || ""}</p>
+  </div>
+
+  <div className='backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed flex-1'>
+    <p>Banque : {formateur.nom_banque || ""}</p>
+    <p>RIB : {formateur.RIB || ""}</p>
+  </div>
+</div>
+<br/>
+          <div className='backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed'>
+
+          <p>Domaines de compétences: {formateur.domaine_de_competences || ""}</p>
+          <p>Domaines de compétences au niveau d'assistance: {formateur.domaine_assistance || ""}</p>
+          <p>Thèmes à enseigner: {formateur.themes_a_enseigner || ""}</p>
+          <p>Nombre des formations: {formateur.nb_formations || ""}</p>
+          <p>Nombre d'années d'experience : {formateur.nb_experience || ""}</p>
+          </div>
+        
+         
         </div>
+        <div className='backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed'>
 
-        {/* 🔹 CV PDF */}
+      
         {formateur.cv && (
           <div>
             <h2 className="text-lg font-semibold">CV :</h2>
@@ -180,9 +202,10 @@ const ProfilFormateur: React.FC = () => {
   <p>Aucune cours disponible.</p>
 )}
 
-
+</div>
         {/* Section de modification de mot de passe */}
-        <div>
+        <div className='backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed flex-1'>
+
           <h2 className="text-xl font-semibold">Modifier votre mot de passe</h2>
           <div className="mt-4">
             <input
@@ -216,40 +239,33 @@ const ProfilFormateur: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col items-center space-y-4">
-          <button
-            onClick={() => handleButtonClick('formationsARealise')}
-            className="px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 transition"
-          >
-            Formations A Réalisé
-          </button>
-          {activeContent === 'formationsARealise' && (<FormationARealise />)}
+        <div className='backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed flex-1'>
+        <h2 className="text-xl font-semibold">Consultez vos sessions</h2>
 
-          <button
-            onClick={() => handleButtonClick('historiqueFormations')}
-            className="px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 transition"
-          >
-            Historique Formations
-          </button>
-          {activeContent === 'historiqueFormations' && (<HistoriqueFormation />)}
-        </div>
+        <div className="flex flex-row justify-center gap-4 mt-4">
+  <button
+    onClick={() => handleButtonClick('formationsARealise')}
+    className="px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 transition"
+  >
+    Formations A Réalisé
+  </button>
+  
+  <button
+    onClick={() => handleButtonClick('historiqueFormations')}
+    className="px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600 transition"
+  >
+    Historique Formations
+  </button>
+</div></div>
+
+{activeContent === 'formationsARealise' && <FormationARealise />}
+{activeContent === 'historiqueFormations' && <HistoriqueFormation />}
 
         <div className="center my-4">
           <Calendrier />
         </div>
 
-        <div className="mt-6 text-center">
-          <h3 className="text-lg font-semibold">
-            En cas de modifications de vos données, veuillez cliquer ici:
-          </h3>
-          <button
-            onClick={() => handleButtonClick('demandeModification')}
-            className="mt-4 px-6 py-3 bg-gray-800 text-white rounded hover:bg-gray-600 transition"
-          >
-            Demander de modification
-          </button>
-          {activeContent === 'demandeModification' && <DemandeModification />}
-        </div>
+        
       </div>
     </div>
   );

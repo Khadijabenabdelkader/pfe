@@ -25,7 +25,7 @@ const queryAsync = (sql, params) => {
 };
 */
 // ✅ Enregistrement d'un utilisateur avec hachage du mot de passe
-const register = async (req, res) => {
+{/*const register = async (req, res) => {
     const { nom_complet, mail, pwd } = req.body;
 
     try {
@@ -62,7 +62,111 @@ const register = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Erreur serveur" });
     }
+};*/}
+
+
+const register = async (req, res) => {
+    const { nom_complet, mail, pwd } = req.body;
+
+    try {
+        // 1. Vérifier si l'email existe déjà
+        const checkEmailSql = "SELECT * FROM participant WHERE mail = ?";
+        
+        db.query(checkEmailSql, [mail], async (err, results) => {
+            if (err) {
+                return res.status(500).json({ message: "Erreur serveur lors de la vérification de l'email" });
+            }
+
+            // 2. Si l'email existe déjà
+            if (results.length > 0) {
+                const user = results[0];
+                
+                // Vérifier si l'utilisateur n'a pas de mot de passe
+                if (!user.pwd) {
+                    try {
+                        // Hachage du mot de passe
+                        const hashedPwd = await bcrypt.hash(pwd.trim(), 10);
+                        const updateSql = "UPDATE participant SET pwd = ?, nom_complet = ? WHERE mail = ?";
+
+                        db.query(updateSql, [hashedPwd, nom_complet, mail], (err, result) => {
+                            if (err) {
+                                return res.status(500).json({ message: "Erreur serveur lors de la mise à jour du mot de passe" });
+                            }
+
+                            return res.status(200).json({ message: "Mot de passe ajouté avec succès à un compte existant" });
+                        });
+                    } catch (hashError) {
+                        return res.status(500).json({ message: "Erreur lors du hachage du mot de passe" });
+                    }
+                } else {
+                    // Si l'email existe et a déjà un mot de passe
+                    return res.status(400).json({ message: "Cet email est déjà utilisé" });
+                }
+            } else {
+                // 3. Si l'email n'existe pas, procéder à l'inscription
+                try {
+                    // Hachage du mot de passe
+                    const hashedPwd = await bcrypt.hash(pwd.trim(), 10);
+                    const insertSql = "INSERT INTO participant (nom_complet, mail, pwd) VALUES (?, ?, ?)";
+
+                    db.query(insertSql, [nom_complet, mail, hashedPwd], (err, result) => {
+                        if (err) {
+                            return res.status(500).json({ message: "Erreur serveur lors de l'inscription" });
+                        }
+
+                        res.status(201).json({ message: "Utilisateur inscrit avec succès" });
+                    });
+                } catch (hashError) {
+                    res.status(500).json({ message: "Erreur lors du hachage du mot de passe" });
+                }
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Erreur serveur" });
+    }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // ✅ Connexion avec vérification du mot de passe et JWT sécurisé
 const login = async (req, res) => {
     const { nom_complet, pwd } = req.body;

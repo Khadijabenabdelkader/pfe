@@ -730,9 +730,7 @@ const FormationsList: React.FC = () => {
                 <h3 className="text-xl font-semibold text-teal-700">{domaine}</h3>
                 
                </div>
-                  <button onClick={() => toggleSessionSearch(domaine)} className="text-teal-600 font-semibold ">
-                    Rechercher sessions...
-                  </button>
+                  
 
                   {showSessionSearch[domaine] && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="mb-5">
@@ -789,10 +787,10 @@ const FormationsList: React.FC = () => {
                         {selectedFormationId === formation.id_formation && (
                           <>
                             {formation.sessions.length > 0 ? (
-                              <table className="w-full mt-4 border-collapse border border-gray-300">
+                              <table className="w-full text-gray-600 mt-4 border-collapse border border-gray-300">
                                 <thead>
                                   <tr className="bg-gray-100">
-                                    <th className="border border-gray-300 px-4 py-2">Thème</th>
+                                    <th className="border text-gray-600 border-gray-300 px-4 py-2">Thème</th>
                                     <th className="border border-gray-300 px-4 py-2">Code</th>
                                     <th className="border border-gray-300 px-4 py-2">Formateur</th>
                                     <th className="border border-gray-300 px-4 py-2">Fiche programme</th>

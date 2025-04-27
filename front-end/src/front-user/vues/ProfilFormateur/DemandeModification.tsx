@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-
-const DemandeModification: React.FC = () => {
+interface DemandeModificationProps {
+  onClose: () => void;
+}
+const DemandeModification: React.FC<DemandeModificationProps> = ({ onClose }) => {
   // Récupérer les données utilisateur depuis localStorage
   const userData = JSON.parse(localStorage.getItem("user") || "{}");
   const nomFormateur = userData.nom_complet || '';
@@ -146,16 +148,27 @@ const DemandeModification: React.FC = () => {
             </div>
           )}
         </div>
+        <div className="flex justify-between mt-4">
 
-        <div className="text-center">
+        <div className="text-left">
+          <br/>
           <button
             type="submit"
             className="px-6 py-3 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition disabled:bg-teal-300"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Envoi en cours...' : 'Envoyer la demande'}
+        </button> </div>
+        <div className="text-right">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-6 py-3 bg-gray-400 text-white rounded-md hover:bg-gray-500 transition"
+          >
+            Annuler
           </button>
-        </div>
+        </div></div>
+
       </form>
     </div>
   );

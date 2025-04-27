@@ -98,7 +98,7 @@ const FeuillePresence = () => {
     setFormData(prev => ({
       ...prev,
       themeFormation: themeId,
-      lieuDeroulement: theme?.domaine || '',
+      lieuDeroulement: theme?.lieu || '',
       periodeDu: theme?.date_debut ? theme.date_debut.split('T')[0] : '',
       periodeAu: theme?.date_fin ? theme.date_fin.split('T')[0] : '',
       formateur: {
@@ -506,140 +506,151 @@ const FeuillePresence = () => {
         </div>
       </div>
       
-      {/* Participants */}
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="font-bold">Liste des Participants</h2>
-          <div className="flex space-x-2">
-            <button 
-              onClick={() => toggleParticipantColumn('CIN')} 
-              className="px-2 py-1 bg-gray-200 rounded text-sm"
-            >
-              {showParticipantColumns.CIN ? 'Masquer CIN' : 'Afficher CIN'}
-            </button>
-            <button 
-              onClick={() => toggleParticipantColumn('directionService')} 
-              className="px-2 py-1 bg-gray-200 rounded text-sm"
-            >
-              {showParticipantColumns.directionService ? 'Masquer Direction' : 'Afficher Direction'}
-            </button>
-            <button 
-              onClick={() => toggleParticipantColumn('entreprise')} 
-              className="px-2 py-1 bg-gray-200 rounded text-sm"
-            >
-              {showParticipantColumns.entreprise ? 'Masquer Entreprise' : 'Afficher Entreprise'}
-            </button>
-          </div>
-        </div>
-        
-        <div className="overflow-x-auto">
-          <table className="min-w-full border">
-            <thead>
-              <tr className="bg-gray-100">
-                <th className="border p-2">n°</th>
-                <th className="border p-2">Nom et prénom</th>
-                {showParticipantColumns.CIN && <th className="border p-2">n° CIN</th>}
-                {showParticipantColumns.mail && <th className="border p-2">Mail</th>}
-                {showParticipantColumns.directionService && <th className="border p-2">Direction / service</th>}
-                {showParticipantColumns.entreprise && <th className="border p-2">Entreprise</th>}
-                {selectedTheme && renderEmargementColumns()}
-                <th className="border p-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {participants.map((participant, index) => (
-                <tr key={participant.id}>
-                  <td className="border p-2">{index + 1}</td>
-                  <td className="border p-2">
-                    <input 
-                      type="text" 
-                      value={participant.nomPrenom} 
-                      onChange={(e) => {
-                        const updatedParticipants = [...participants];
-                        updatedParticipants[index].nomPrenom = e.target.value;
-                        setParticipants(updatedParticipants);
-                      }} 
-                      className="w-full p-1 border rounded"
-                    />
-                  </td>
-                  {showParticipantColumns.CIN && (
-                    <td className="border p-2">
-                      <input 
-                        type="number" 
-                        value={participant.CIN} 
-                        onChange={(e) => {
-                          const updatedParticipants = [...participants];
-                          updatedParticipants[index].CIN = e.target.value;
-                          setParticipants(updatedParticipants);
-                        }} 
-                        className="w-full p-1 border rounded"
-                      />
-                    </td>
-                  )}
-                  {showParticipantColumns.mail && (
-                    <td className="border p-2">
-                      <input 
-                        type="mail" 
-                        value={participant.mail} 
-                        onChange={(e) => {
-                          const updatedParticipants = [...participants];
-                          updatedParticipants[index].mail = e.target.value;
-                          setParticipants(updatedParticipants);
-                        }} 
-                        className="w-full p-1 border rounded"
-                      />
-                    </td>
-                  )}
-                  {showParticipantColumns.directionService && (
-                    <td className="border p-2">
-                      <input 
-                        type="text" 
-                        value={participant.directionService} 
-                        onChange={(e) => {
-                          const updatedParticipants = [...participants];
-                          updatedParticipants[index].directionService = e.target.value;
-                          setParticipants(updatedParticipants);
-                        }} 
-                        className="w-full p-1 border rounded"
-                      />
-                    </td>
-                  )}
-                  {showParticipantColumns.entreprise && (
-                    <td className="border p-2">
-                      <input 
-                        type="text" 
-                        value={participant.entreprise} 
-                        onChange={(e) => {
-                          const updatedParticipants = [...participants];
-                          updatedParticipants[index].entreprise = e.target.value;
-                          setParticipants(updatedParticipants);
-                        }} 
-                        className="w-full p-1 border rounded"
-                      />
-                    </td>
-                  )}
-                  {selectedTheme && renderEmargementCells(participant)}
-                  <td className="border p-2">
-                    <button 
-                      onClick={() => removeParticipant(participant.id)}
-                      className="text-red-500 text-sm"
-                    >
-                      Supprimer
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <button 
-          onClick={addParticipant} 
-          className="mt-2 px-4 py-2  text-black rounded hover:bg-gray-400"
-        >
-          + 
-        </button>
-      </div>
-      
+{/* Participants */}
+<div className="mb-8">
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="text-xl font-bold">Liste des Participants</h2>
+    <div className="flex space-x-2">
+      <button 
+        onClick={() => toggleParticipantColumn('CIN')} 
+        className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm"
+      >
+        {showParticipantColumns.CIN ? 'Masquer CIN' : 'Afficher CIN'}
+      </button>
+      <button 
+        onClick={() => toggleParticipantColumn('directionService')} 
+        className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm"
+      >
+        {showParticipantColumns.directionService ? 'Masquer Direction' : 'Afficher Direction'}
+      </button>
+      <button 
+        onClick={() => toggleParticipantColumn('entreprise')} 
+        className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm"
+      >
+        {showParticipantColumns.entreprise ? 'Masquer Entreprise' : 'Afficher Entreprise'}
+      </button>
+    </div>
+  </div>
+  
+  <div className="overflow-x-auto rounded-lg shadow">
+    <table className="min-w-full bg-white border">
+      <thead>
+        <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+          <th className="py-3 px-3 text-left border">N°</th>
+          <th className="py-3 px-8 text-left border">Nom et Prénom</th>
+          {showParticipantColumns.CIN && <th className="py-3 px-8 text-left border">N° CIN</th>}
+          {showParticipantColumns.mail && <th className="py-3 px-8 text-left border">Email</th>}
+          {showParticipantColumns.directionService && <th className="py-3 px-10 text-left border">Direction / Service</th>}
+          {showParticipantColumns.entreprise && <th className="py-3 px-8 text-left border">Entreprise</th>}
+          {selectedTheme && renderEmargementColumns()}
+          <th className="py-3 px-6 text-center border">Actions</th>
+        </tr>
+      </thead>
+      <tbody className="text-gray-600 text-sm font-light">
+        {participants.map((participant, index) => (
+          <tr 
+            key={participant.id}
+            className="border-b hover:bg-gray-100 transition duration-200"
+          >
+            <td className="py-3 px-3 border">{index + 1}</td>
+            <td className="py-3 px-2 border">
+              <input 
+                type="text" 
+                value={participant.nomPrenom} 
+                onChange={(e) => {
+                  const updatedParticipants = [...participants];
+                  updatedParticipants[index].nomPrenom = e.target.value;
+                  setParticipants(updatedParticipants);
+                }} 
+                className="w-full p-2 border rounded-md"
+              />
+            </td>
+
+            {showParticipantColumns.CIN && (
+              <td className="py-3 px-2 border">
+                <input 
+                  type="number" 
+                  value={participant.CIN} 
+                  onChange={(e) => {
+                    const updatedParticipants = [...participants];
+                    updatedParticipants[index].CIN = e.target.value;
+                    setParticipants(updatedParticipants);
+                  }} 
+                  className="w-full p-2 border rounded-md"
+                />
+              </td>
+            )}
+            {showParticipantColumns.mail && (
+              <td className="py-3 px-2 border">
+                <input 
+                  type="email" 
+                  value={participant.mail} 
+                  onChange={(e) => {
+                    const updatedParticipants = [...participants];
+                    updatedParticipants[index].mail = e.target.value;
+                    setParticipants(updatedParticipants);
+                  }} 
+                  className="w-full p-2 border rounded-md"
+                />
+              </td>
+            )}
+            {showParticipantColumns.directionService && (
+              <td className="py-3 px-2 border">
+                <input 
+                  type="text" 
+                  value={participant.directionService} 
+                  onChange={(e) => {
+                    const updatedParticipants = [...participants];
+                    updatedParticipants[index].directionService = e.target.value;
+                    setParticipants(updatedParticipants);
+                  }} 
+                  className="w-full p-2 border rounded-md"
+                />
+              </td>
+            )}
+            {showParticipantColumns.entreprise && (
+              <td className="py-3 px- border">
+                <input 
+                  type="text" 
+                  value={participant.entreprise} 
+                  onChange={(e) => {
+                    const updatedParticipants = [...participants];
+                    updatedParticipants[index].entreprise = e.target.value;
+                    setParticipants(updatedParticipants);
+                  }} 
+                  className="w-full p-2 border rounded-md"
+                />
+              </td>
+            )}
+            {selectedTheme && renderEmargementCells(participant)}
+
+            <td className="py-3 px-6 text-center border">
+            <button
+                  onClick={() => removeParticipant(participant.id)}
+                  className="text-red-600 hover:text-red-900 transition-colors"
+                  title="Supprimer"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <div className="flex justify-end mt-4">
+    <button 
+      onClick={addParticipant} 
+      className="flex items-center px-5 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow"
+    >
+      + Ajouter Participant
+    </button>
+  </div>
+</div>
+
       {/* Formateurs */}
       <div className="mb-6 p-4 border rounded">
         <h2 className="font-bold mb-4">Formateur</h2>

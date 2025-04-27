@@ -177,13 +177,15 @@ const ProfilParticipant: React.FC = () => {
   if (!participant) return <p className="text-center text-gray-500 mt-10">Chargement du profil...</p>;
 
   return (
-    <div className="max-w-xl pt-30 mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
+    <div className="max-w-xl pt-30 mx-auto mt-0 p-3 bg-white shadow-lg rounded-lg border border-gray-200 dark:bg-gray-900 dark:border-gray-700">
       <h2 className="text-3xl text-center font-semibold text-teal-600 dark:text-white mb-4">
         Mon Profil
       </h2>
 
       {isEditing ? (
         <form onSubmit={handleSubmit} className="space-y-4">
+            <div className='backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed flex-1'>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nom Complet</label>
             <input
@@ -236,7 +238,7 @@ const ProfilParticipant: React.FC = () => {
               onChange={handleNatureChange}
               className="w-full p-2 border rounded-md"
             >
-              <option value="personne">Personne physique</option>
+              <option value="personne physique">Personne physique</option>
               <option value="entreprise">Entreprise</option>
             </select>
           </div>
@@ -304,10 +306,12 @@ const ProfilParticipant: React.FC = () => {
             className="w-full p-3 bg-teal-600 text-white rounded-md mt-4"
           >
             Enregistrer les modifications
-          </button>
+          </button></div>
         </form>
       ) : (
         <div className="space-y-3">
+                      <div className='backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed flex-1'>
+
           <p className="text-gray-700 dark:text-gray-300">
             <strong className="text-gray-900 dark:text-white">Nom:</strong> {participant.nom_complet}
           </p>
@@ -342,7 +346,7 @@ const ProfilParticipant: React.FC = () => {
                 <strong className="text-gray-900 dark:text-white">Adresse Entreprise:</strong> {participant.email_entreprise}
               </p>
             </div>
-          )}
+          )}</div>
 
           <button
             onClick={() => setIsEditing(true)}

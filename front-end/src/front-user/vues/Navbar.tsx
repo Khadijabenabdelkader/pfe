@@ -172,8 +172,8 @@ const Navbar: React.FC = () => {
   const Links = [
     { name: "CATALOGUE", link: "/Catalogue" },
     { name: "CALENDRIER", link: "/Calendrier" },
-    ...(user && !user.isFormateur ? [{ name: "Avis", link: "/avis_formation" }] : []),
-    ...(user && user.isFormateur ? [{ name: "Avis", link: "/avis_formateur" }] : []),
+    ...(user && !user.isFormateur ? [{ name: "AVIS", link: "/avis_formation" }] : []),
+    ...(user && user.isFormateur ? [{ name: "AVIS", link: "/avis_formateur" }] : []),
     { name: "NOS REFERENCES", link: "/references" },
     { name: "CONTACT", link: "/Footer" },
   ];

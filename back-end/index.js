@@ -86,6 +86,39 @@ app.use('/apiUser', AvisFormateurRoute);
 app.use('/apiUser/demanderFormation',demanderFormationRoute);
 app.use('/apiUser/calendrierFormation',CalendrierFormationRoute);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/*const db = mysql.createConnection({
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_DATABASE,
+});
+
+const result = db.query('SELECT * FROM admin', (err, rows) => {
+  if (err) {
+    console.error('Erreur lors de la récupération des données :', err);
+  } else {
+    console.log('Données récupérées avec succès :', rows);
+  }
+});*/}
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });

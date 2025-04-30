@@ -456,7 +456,7 @@ const CatalogueListAdmin: React.FC = () => {
                                         {session.formateurs?.length > 0 ? (
                                           session.formateurs.map((formateur) => (
                                             <div key={formateur.id_formateur} className="text-teal-600 hover:text-teal-800 cursor-pointer underline" onClick={() => handleShowFormateurDetails(formateur)}>
-                                              {formateur.nom_complet} 
+                                             {formateur.rang}: {formateur.nom_complet} 
                                             </div>
                                           ))
                                         ) : (

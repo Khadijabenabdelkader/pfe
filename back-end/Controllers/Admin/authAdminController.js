@@ -65,3 +65,61 @@ const logout = (req, res) => {
 };
 
 module.exports = { login, logout };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/*}
+
+const authAdminService = require('../../services/admin/authAdminServices');
+
+class AuthAdminController {
+  async login(req, res) {
+    try {
+      const { nom_admin, password } = req.body;
+      
+      if (!nom_admin || !password) {
+        return res.status(400).json({ message: 'Tous les champs sont obligatoires' });
+      }
+
+      const { token, admin } = await authAdminService.login(nom_admin, password);
+
+      res.cookie('auth_token', token, { 
+        httpOnly: true, 
+        maxAge: 3600000,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict'
+      });
+
+      res.status(200).json({
+        message: 'Connexion réussie',
+        ...admin,
+        token
+      });
+    } catch (error) {
+      res.status(401).json({ message: error.message });
+    }
+  }
+
+  logout(req, res) {
+    try {
+      res.clearCookie('auth_token');
+      const result = authAdminService.logout();
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(500).json({ message: 'Erreur lors de la déconnexion' });
+    }
+  }
+}
+
+module.exports = new AuthAdminController();*/}

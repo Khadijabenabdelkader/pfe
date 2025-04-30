@@ -1,4 +1,3 @@
-
 const db = require('../../connect');
 
 const getCatalogue = async (req, res) => {
@@ -589,3 +588,74 @@ const addThemeToDomain = async (req, res) => {
   module.exports = {
     getCatalogue,updateDomain,getFormateursBySession,addThemeToDomain
   };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{/*}  const catalogueService = require('../../services/admin/catalogueService');
+
+class CatalogueController {
+  async getCatalogue(req, res) {
+    try {
+      const catalogue = await catalogueService.getCatalogue();
+      res.json(catalogue);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getFormateursBySession(req, res) {
+    try {
+      const result = await catalogueService.getFormateursBySession(req.params.id_session);
+      res.json(result);
+    } catch (error) {
+      if (error.message === 'Session non trouvée') {
+        return res.status(404).json({ error: error.message });
+      }
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async updateDomain(req, res) {
+    try {
+      const result = await catalogueService.updateDomain(
+        req.params.id_formation,
+        req.body
+      );
+      res.json(result);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async addThemeToDomain(req, res) {
+    try {
+      const result = await catalogueService.addThemeToDomain(
+        req.body.domaineName,
+        req.body
+      );
+      res.status(201).json(result);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+}
+
+module.exports = new CatalogueController();*/}

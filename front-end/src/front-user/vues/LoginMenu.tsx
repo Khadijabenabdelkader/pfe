@@ -389,6 +389,7 @@ const LoginMenu: React.FC<LoginMenuProps> = ({ onClose }) => {
   const onLogin = async (data: any) => {
     try {
       setError(null);
+      console.log("Données du formulaire:", data);
       const bodyData = { nom_complet: data.nom_complet, pwd: data.pwd };
       console.log("Sending login request with:", bodyData);
       const response = await fetch(`${import.meta.env.VITE_APP_API_URL}/apiUser/login`, {

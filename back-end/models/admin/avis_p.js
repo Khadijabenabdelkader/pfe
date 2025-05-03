@@ -17,9 +17,6 @@ class Avis {
     this.homogeneite_groupe = data.homogeneite_groupe;
     this.satisfaction_attentes = data.satisfaction_attentes;
     this.duree_formation = data.duree_formation;
-    this.nom_complet = data.nom_complet;
-    this.nature_participant = data.nature_participant;
-    this.nom_entreprise = data.nom_entreprise;
   }
 }
 

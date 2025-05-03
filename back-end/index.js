@@ -48,7 +48,7 @@ const catalogueR= require('./Routes/Admin/catalogueRoutes');
 // Importation des routes utilisateur
 
 const formateurRoute = require('./Routes/User/formateursRoute'); // Using require for consistency
-const formationRoute = require('./Routes/User/formationRouter');
+const catalogueRoute = require('./Routes/User/CatalogueRouter');
 const contactRoute = require('./Routes/User/contactRoute');
 const profilFormateurRoute = require('./Routes/User/profilFormateurRoute');
 const profilParticipantRoute = require('./Routes/User/profilParticipantRoute');
@@ -76,7 +76,7 @@ app.use('/apiAdmin/avis',avisF);
 app.use('/apiAdmin',calForm);
 // Routes utilisateur
 app.use('/apiUser/formateurs', formateurRoute);
-app.use('/apiUser/formations',formationRoute);
+app.use('/apiUser/formations',catalogueRoute);
 app.use('/apiUser', contactRoute);
 app.use('',profilFormateurRoute);
 app.use("/apiUser/participants", profilParticipantRoute);
@@ -87,38 +87,6 @@ app.use('/apiUser/demanderFormation',demanderFormationRoute);
 app.use('/apiUser/calendrierFormation',CalendrierFormationRoute);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{/*const db = mysql.createConnection({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-});
-
-const result = db.query('SELECT * FROM admin', (err, rows) => {
-  if (err) {
-    console.error('Erreur lors de la récupération des données :', err);
-  } else {
-    console.log('Données récupérées avec succès :', rows);
-  }
-});*/}
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });

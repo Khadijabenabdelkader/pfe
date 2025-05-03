@@ -13,13 +13,13 @@ interface Participant {
   mail: string;
   telephone: string;
   adresse: string;
+  id_entreprise: number;
   matricule: string;
   nom_entreprise: string;
   tel_entreprise: string;
   email_entreprise: string;
   adr_entreprise: string;
-  nature_participant: string;
-  sessions: Session[];
+  
 }
 
 const ProfilParticipant: React.FC = () => {
@@ -31,13 +31,13 @@ const ProfilParticipant: React.FC = () => {
     try {
       const userData = JSON.parse(localStorage.getItem("user") || "{}");
 
-      if (!userData.id_participant) {
+      if (!userData.id) {
         console.error("ID participant non trouvé !");
         return;
       }
 
       const response = await axios.get(
-        `${import.meta.env.VITE_APP_API_URL}/apiUser/participants/${userData.id_participant}`,
+        `${import.meta.env.VITE_APP_API_URL}/apiUser/participants/${userData.id}`,
         {
           headers: {
             Authorization: `Bearer ${userData.token}`,
@@ -64,6 +64,7 @@ const ProfilParticipant: React.FC = () => {
 
     checkAuthentication();
   }, [navigate]);
+  
   useEffect(() => {
     if (participant) {
       // Update localStorage when participant data changes
@@ -97,54 +98,7 @@ const ProfilParticipant: React.FC = () => {
   };
   
 
-  /*const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
   
-    if (!participant || !participant.id_participant) {
-      console.error("Participant data is incomplete.");
-      return;
-    }
-  
-    try {
-      
-  
-      // Ajoutez une logique pour gérer les champs undefined ici
-      const updatedParticipant = {
-        ...participant,
-        id_participant: participant.id_participant, 
-        nom_complet: participant.nom_complet || '',
-        mail: participant.mail || '',
-        telephone: participant.telephone || '',
-        adresse: participant.adresse || '',
-        nature_participant: participant.nature_participant || 'personne',
-        matricule: participant.matricule || '',
-        nom_entreprise: participant.nom_entreprise || '', 
-        tel_entreprise: participant.tel_entreprise || '',
-        email_entreprise: participant.email_entreprise || '',
-        adr_entreprise: participant.adr_entreprise || '',
-      };
-      console.log("ID participant :", participant?.id_participant);
-
-      const response = await axios.put(
-        `${import.meta.env.VITE_APP_API_URL}/apiUser/participants/${participant.id_participant}`,
-        updatedParticipant,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        }
-      );
-       setIsEditing(false); // Fermer le mode édition
-      fetchParticipantDetails(); // Recharger les détails du participant
-      const userData = JSON.parse(localStorage.getItem("user") || "{}");
-      const updatedUserData = { ...userData, ...updatedParticipant };
-      localStorage.setItem("user", JSON.stringify(updatedUserData));
-      console.log("Participant mis à jour :", updatedUserData);
-
-    } catch (error) {
-      console.error("Erreur lors de la mise à jour du profil:", error);
-    }
-  };*/
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
   
@@ -230,20 +184,8 @@ const ProfilParticipant: React.FC = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nature du Participant</label>
-            <select
-              name="nature_participant"
-              value={participant?.nature_participant || ""}
-              onChange={handleNatureChange}
-              className="w-full p-2 border rounded-md"
-            >
-              <option value="personne physique">Personne physique</option>
-              <option value="entreprise">Entreprise</option>
-            </select>
-          </div>
+          
 
-          {participant?.nature_participant === "entreprise" && (
             <div className="mt-4 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Entreprise</label>
@@ -299,7 +241,7 @@ const ProfilParticipant: React.FC = () => {
                 />
               </div>
             </div>
-          )}
+          
 
           <button
             type="submit"
@@ -324,11 +266,9 @@ const ProfilParticipant: React.FC = () => {
           <p className="text-gray-700 dark:text-gray-300">
             <strong className="text-gray-900 dark:text-white">Adresse:</strong> {participant.adresse}
           </p>
-          <p className="text-gray-700 dark:text-gray-300">
-            <strong className="text-gray-900 dark:text-white">Nature:</strong> {participant.nature_participant}
-          </p>
 
-          {participant.nature_participant === "entreprise" && (
+
+          {(participant?.nom_entreprise || participant?.tel_entreprise || participant?.email_entreprise || participant?.adr_entreprise) && (
             <div className="border-t pt-4 mt-4">
               <p className="text-gray-700 dark:text-gray-300">
                 <strong className="text-gray-900 dark:text-white">Entreprise:</strong> {participant.nom_entreprise}

@@ -1,13 +1,13 @@
 class Event {
-    constructor({ id, title, date, created_by }) {
-      this.id = id;
-      this.title = title;
+    constructor({ id_event, event, date, created_by }) {
+      this.id_event = id_event;
+      this.event = event;
       this.date = date;
       this.created_by = created_by;
     }
   
     validate() {
-      if (!this.title || !this.date || !this.created_by) {
+      if (!this.event || !this.date || !this.created_by) {
         throw new Error('Tous les champs (title, date, created_by) sont requis');
       }
     }

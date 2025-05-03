@@ -50,7 +50,7 @@ const DemandeModification: React.FC<DemandeModificationProps> = ({ onClose }) =>
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: ` Bearer ${userData.token}`,
           },
         }
       );

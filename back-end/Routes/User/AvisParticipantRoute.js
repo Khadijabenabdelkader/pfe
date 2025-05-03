@@ -1,11 +1,11 @@
+
 const express = require('express');
-const { stockerAvis,
-    getSessions } = require('../../Controllers/User/AvisUserController');
 const router = express.Router();
+const AvisUserController = require('../../Controllers/User/AvisUserController');
 
-// Route pour récupérer les sessions auxquelles un participant a participé
-router.get('/sessions', getSessions);
+const controller = new AvisUserController();
 
-// Route pour uploader le fichier PDF rempli
-router.post('/avisParticipant', stockerAvis);
+router.post('/avisParticipant', (req, res) => controller.createAvis(req, res));
+router.get('/sessions', (req, res) => controller.getSessions(req, res));
+
 module.exports = router;

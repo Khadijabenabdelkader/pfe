@@ -22,8 +22,8 @@ const Calendrier: React.FC = () => {
     .then(response => {
       console.log("Données reçues de l'API :", response.data); // ➡️ Vérifie ici
       const formattedEvents = response.data.map((event: any) => ({
-        id: event.id,
-        title: event.title,
+        id_event: event.id_event,
+        event: event.event,
         start: event.date,  // Assurez-vous que "date" est bien au format YYYY-MM-DD
         extendedProps: {
           created_by: event.created_by || event.nom_complet,
@@ -51,13 +51,13 @@ const Calendrier: React.FC = () => {
     }
   
   
-    const title = prompt("Entrez le titre de l'événement :");
-    if (title) {
+    const event = prompt("Entrez le titre de l'événement :");
+    if (event) {
       axios
         .post(
           `${import.meta.env.VITE_APP_API_URL}/apiAdmin/calendrierEvent/create`,
           {
-            title,
+            event,
             date: info.dateStr,
             created_by: userData.nom_complet,
           },
@@ -67,8 +67,8 @@ const Calendrier: React.FC = () => {
         )
         .then((response) => {
           const newEvent = {
-            id: response.data.id,  // Utilise l'ID renvoyé par la réponse de l'API
-            title,
+            id_event: response.data.id_event,  // Utilise l'ID renvoyé par la réponse de l'API
+            event,
             start: info.dateStr,
             extendedProps: {
               created_by: userData.nom_complet,
@@ -92,14 +92,14 @@ const Calendrier: React.FC = () => {
       return;
     }
   
-    if (!info.event || !info.event.id) {
+    if (!info.event || !info.event.id_event) {
       console.error("Erreur: l'événement est undefined ou n'a pas d'ID.");
       return;
     }
   
     if (info.event.extendedProps.created_by === userData.nom_complet) {
-      if (window.confirm(`Voulez-vous supprimer l'événement : "${info.event.title}" ?`)) {
-        axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/calendrier/${info.event.id}`, {
+      if (window.confirm(`Voulez-vous supprimer l'événement : "${info.event.event}" ?`)) {
+        axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/calendrier/${info.event.id_event}`, {
           headers: { Authorization: `Bearer ${userData.token}` }
         })
         .then(() => {
@@ -119,7 +119,7 @@ const Calendrier: React.FC = () => {
   const renderEventContent = (eventInfo: any) => {
     return (
       <div>
-        <b>{eventInfo.event.title}</b>
+        <b>{eventInfo.event.event}</b>
         <br />
         <i>Créé par: {eventInfo.event.extendedProps.created_by}</i>
       </div>

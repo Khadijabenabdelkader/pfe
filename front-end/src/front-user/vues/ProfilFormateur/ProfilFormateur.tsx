@@ -29,12 +29,12 @@ const ProfilFormateur: React.FC = () => {
     const fetchFormateurDetails = async () => {
       try {
         const userData = JSON.parse(localStorage.getItem("user") || "{}");
-        if (!userData.id_formateur || !userData.token) {
+        if (!userData.id || !userData.token) {
           console.error("❌ ID formateur ou token non trouvés !");
           return;
         }
     
-        const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/apiUser/formateur/details/${userData.id_formateur}`, { 
+        const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/apiUser/formateur/details/${userData.id}`, { 
           headers: {
             Authorization: `Bearer ${userData.token}`,
           },
@@ -62,13 +62,13 @@ const ProfilFormateur: React.FC = () => {
 
     try {
       const userData = JSON.parse(localStorage.getItem("user") || "{}");
-      if (!userData.id_formateur) {
+      if (!userData.id) {
         console.error("ID formateur non trouvé !");
         return;
       }
 
       const response = await axios.put(
-        `${import.meta.env.VITE_APP_API_URL}/apiUser/formateur/details/${userData.id_formateur}`,
+        `${import.meta.env.VITE_APP_API_URL}/apiUser/formateur/details/${userData.id}`,
         {
           old_password: oldPassword,
           new_password: newPassword,

@@ -16,25 +16,35 @@ class ProfilParticipantUserService {
 
     async updateParticipantProfile(id_participant, updateData) {
         try {
-            // Validation supplémentaire si nécessaire
-            if (!id_participant || isNaN(id_participant)) {
+            // Validation des entrées
+            if (!id_participant || isNaN(Number(id_participant))) {
                 throw new Error('ID participant invalide');
             }
     
-            // Appel au repository
-            const result = await participantRepository.updateParticipantProfile(id_participant, updateData);
-            
-            // Vous pouvez ajouter ici des transformations des données si nécessaire
-            return result;
+            // Normalisation des données
+            const cleanData = {
+                ...updateData,
+                telephone: updateData.telephone || null,
+                adresse: updateData.adresse || null,
+                CIN: updateData.CIN || null
+            };
     
+            // Appel au repository
+            const result = await this.repository.updateParticipantProfile(
+                Number(id_participant),
+                cleanData
+            );
+    
+            return {
+                success: result.success,
+                message: result.message,
+                affectedRows: result.affectedRows
+            };
         } catch (error) {
-            console.error('Service Error - updateParticipantProfile:', error);
-            
-            // Différencier les types d'erreurs
-            if (error.message.includes('obligatoires')) {
-                throw new Error('Validation error: ' + error.message);
-            }
-            throw new Error('Échec de la mise à jour du profil: ' + error.message);
+            console.error('Service Error:', error);
+            throw new Error(error.message.includes('requis') ? 
+                'Validation error: ' + error.message : 
+                'Database error: ' + error.message);
         }
     }
 }

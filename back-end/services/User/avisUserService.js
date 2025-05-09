@@ -30,6 +30,12 @@ class AvisUserService {
             }
 
             const sessions = await this.repository.getSessionsByParticipant(id_participant);
+            
+            // Vérification des résultats
+            if (!Array.isArray(sessions)) {
+                throw new Error('Format de données inattendu');
+            }
+
             return sessions;
 
         } catch (error) {

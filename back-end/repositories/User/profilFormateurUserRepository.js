@@ -212,126 +212,83 @@ async getSessionsByStatus(id_formateur, status) {
     }
 }
 
+
 async updatePassword(id_formateur, hashedPassword) {
-    try {
-        const query = 'UPDATE formateur SET mdp_formateur = ? WHERE id_formateur = ?';
-        const result = await db.query(query, [hashedPassword, id_formateur]);
-        
-        // Vérification basée sur le format de réponse
-        const affectedRows = result.affectedRows || (result[0] ? result[0].affectedRows : 0);
-        return affectedRows > 0;
-    } catch (err) {
-        console.error('FormateurRepository Error - updatePassword:', err);
-        throw new Error('Database error while updating password');
-    }
-}
-
-async verifyPassword(id_formateur) {
-    try {
-        const query = 'SELECT mdp_formateur FROM formateur WHERE id_formateur = ?';
-        const results = await db.query(query, [id_formateur]);
-        
-        // Gestion des différents formats de réponse
-        const row = Array.isArray(results) ? 
-            (results[0] ? results[0][0] : null) : 
-            results;
-        
-        if (!row || !row.mdp_formateur) {
-            return false;
+    return new Promise((resolve, reject) => {
+      const query = 'UPDATE formateur SET mdp_formateur = ? WHERE id_formateur = ?';
+      
+      db.query(query, [hashedPassword, id_formateur], (error, result) => {
+        if (error) {
+          console.error('Repository Error - updatePassword:', error);
+          return reject(new Error('Database error while updating password'));
         }
         
-        return row.mdp_formateur;
-    } catch (err) {
-        console.error('FormateurRepository Error - verifyPassword:', err);
-        throw new Error('Database error while verifying password');
-    }
-}
-    async getEvents(nom_complet) {
-        try {
-            // 1. Exécution de la requête sans déstructuration immédiate
-            const queryResult = await this.db.query(
-                'SELECT id_event, event, date, created_by FROM event WHERE created_by = ? ORDER BY date',
-                [nom_complet]
-            );
+        // Vérifie si la mise à jour a affecté au moins une ligne
+        resolve(result.affectedRows > 0);
+      });
+    });
+  }
 
-            // 2. Vérification robuste des résultats
-            if (!queryResult || !Array.isArray(queryResult[0])) {
-                console.warn('Aucun événement trouvé ou format de réponse inattendu');
-                return []; // Retourne un tableau vide plutôt que null/undefined
-            }
-
-            // 3. Extraction sécurisée des rows
-            const rows = queryResult[0];
-
-            // 4. Transformation et validation des données
-            return rows.map(row => {
-                if (!row.id_event || !row.event || !row.date || !row.created_by) {
-                    console.warn('Événement incomplet ignoré', row);
-                    return null;
-                }
-                return {
-                    id_event: row.id_event,
-                    event: row.event,
-                    date: row.date,
-                    created_by: row.created_by
-                };
-            }).filter(event => event !== null); // Filtre les éventuels nulls
-
-        } catch (err) {
-            console.error('Repository Error - getEvents:', err);
-            throw new Error('Erreur lors de la récupération des événements');
+  async verifyPassword(id_formateur) {
+    return new Promise((resolve, reject) => {
+      const query = 'SELECT mdp_formateur FROM formateur WHERE id_formateur = ?';
+      
+      db.query(query, [id_formateur], (error, results) => {
+        if (error) {
+          console.error('Repository Error - verifyPassword:', error);
+          return reject(new Error('Database error while verifying password'));
         }
-    }
-
-    async createEvent(eventData) {
-        try {
-            // 1. Exécution de la requête
-            const queryResult = await this.db.query(
-                'INSERT INTO event (event, date, created_by) VALUES (?, ?, ?)',
-                [eventData.event, eventData.date, eventData.created_by]
-            );
-
-            // 2. Vérification du résultat
-            if (!queryResult || !queryResult[0] || !queryResult[0].insertId) {
-                throw new Error('Échec de la création de l\'événement: réponse inattendue de la base de données');
-            }
-
-            // 3. Retour des données créées
-            return {
-                id_event: queryResult[0].insertId,
-                ...eventData
-            };
-
-        } catch (err) {
-            console.error('Repository Error - createEvent:', err);
-            throw new Error(`Erreur lors de la création de l'événement: ${err.message}`);
+        
+        if (!results || results.length === 0) {
+          return resolve(null); // Aucun formateur trouvé
         }
-    }
+        
+        resolve(results[0].mdp_formateur);
+      });
+    });
+  }
 
-    async deleteEvent(id_event, created_by) {
-        try {
-            // 1. Exécution de la requête
-            const queryResult = await this.db.query(
-                'DELETE FROM event WHERE id_event = ? AND created_by = ?',
-                [id_event, created_by]
-            );
-
-            // 2. Vérification du résultat
-            if (!queryResult || !queryResult[0]) {
-                throw new Error('Réponse inattendue de la base de données');
-            }
-
-            if (queryResult[0].affectedRows === 0) {
-                throw new Error('Événement non trouvé ou non autorisé');
-            }
-
-            return { success: true, affectedRows: queryResult[0].affectedRows };
-
-        } catch (err) {
-            console.error('Repository Error - deleteEvent:', err);
-            throw new Error(`Erreur lors de la suppression: ${err.message}`);
+async getAllEvents() {
+    return new Promise((resolve, reject) => {
+      db.query('SELECT * FROM event', (err, results) => {
+        if (err) {
+          console.error('Repository Error - getAllEvents:', err);
+          return reject(new Error('Database error while fetching events'));
         }
-    }
+        resolve(results);
+      });
+    });
+  }
+
+  async createEvent(event, date, created_by) {
+    return new Promise((resolve, reject) => {
+      const query = 'INSERT INTO event (event, date, created_by) VALUES (?, ?, ?)';
+      
+      db.query(query, [event, date, created_by], (err, result) => {
+        if (err) {
+          console.error('Repository Error - createEvent:', err);
+          return reject(new Error('Database error while creating event'));
+        }
+        
+        resolve({
+          id: result.insertId,
+          event,
+          date,
+          created_by
+        });
+      });
+    });
+  }
+
+  async deleteEvent(id_event, created_by) {
+    return new Promise((resolve, reject) => {
+      const query = 'DELETE FROM event WHERE id_event = ? AND created_by = ?';
+      db.query(query, [id_event, created_by], (err, result) => {
+        if (err) return reject(err);
+        resolve(result.affectedRows > 0);
+      });
+    });
+  }
 
     async sendModificationRequest(requestData) {
         try {

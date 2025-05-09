@@ -120,58 +120,106 @@ class ProfilFormateurUserController {
     
         async changePassword(req, res) {
             try {
-                const { id_formateur } = req.params;
-                const { oldPassword, newPassword } = req.body;
-                
-                await this.service.updatePassword(id_formateur, oldPassword, newPassword);
-                
-                res.json({ message: 'Password updated successfully' });
+              const { id } = req.params;
+              const { oldPassword, newPassword } = req.body;
+          
+              // Validation des entrées
+              if (!oldPassword || !newPassword) {
+                return res.status(400).json({ 
+                  error: 'Ancien et nouveau mot de passe requis' 
+                });
+              }
+          
+              if (newPassword.length < 8) {
+                return res.status(400).json({ 
+                  error: 'Le mot de passe doit contenir au moins 8 caractères' 
+                });
+              }
+          
+              const updated = await this.service.updatePassword(
+                id, 
+                oldPassword, 
+                newPassword
+              );
+          
+              if (!updated) {
+                return res.status(400).json({ 
+                  error: 'Échec de la mise à jour du mot de passe' 
+                });
+              }
+          
+              res.json({ 
+                success: true,
+                message: 'Mot de passe mis à jour avec succès' 
+              });
+          
             } catch (err) {
-                console.error('FormateurController Error - changePassword:', err);
-                const status = err.message.includes('not found') || err.message.includes('incorrect') ? 400 : 500;
-                res.status(status).json({ message: err.message || 'Error updating password' });
+              console.error('Controller Error:', err);
+              
+              const status = err.message.includes('incorrect') ? 400 : 500;
+              res.status(status).json({ 
+                error: err.message || 'Erreur serveur' 
+              });
             }
-        }
+          }
+        async getEvents(req, res) {
+            try {
+              const events = await this.service.getEvents();
+              res.status(200).json(events);
+            } catch (error) {
+              console.error('Controller Error - getEvents:', error);
+              res.status(500).json({ error: error.message });
+            }
+          }
+        
+          async createEvent(req, res) {
+            try {
+              const { event, date, created_by } = req.body;
+              
+              if (!event || !date || !created_by) {
+                return res.status(400).json({ error: 'Title, date and created_by are required' });
+              }
+        
+              const newEvent = await this.service.createEvent({ event, date, created_by });
+              res.status(201).json(newEvent);
+            } catch (error) {
+              console.error('Controller Error - createEvent:', error);
+              res.status(500).json({ error: error.message });
+            }
+          }
+        
+         // Controller
+// Controller
+async deleteEvent(req, res) {
+  try {
+    // Extraction CORRECTE de id_event
+    const id_event = req.params.id_event;
 
-    async getEvents(req, res) {
-      try {
-          const nom_complet = req.user.nom_complet;
-          const events = await this.service.getEvents(nom_complet);
-          res.json(events);
-      } catch (err) {
-          console.error('Controller Error - getEvents:', err);
-          res.status(500).json({ error: err.message });
-      }
+    if (!id_event) {
+      return res.status(400).json({ error: 'ID manquant' });
+    }
+
+    if (!req.user?.nom_complet) {
+      return res.status(401).json({ error: 'Authentification requise' });
+    }
+
+    const success = await this.service.deleteEvent(
+      id_event,
+      req.user.nom_complet
+    );
+
+    if (!success) {
+      return res.status(404).json({ error: 'Événement non trouvé ou non autorisé' });
+    }
+
+    res.status(200).json({ message: 'Événement supprimé' });
+  } catch (error) {
+    console.error('Erreur:', error);
+    res.status(500).json({ error: error.message });
   }
 
-  async createEvent(req, res) {
-      try {
-          const eventData = {
-              event: req.body.event,
-              date: req.body.date,
-              created_by: req.user.nom_complet
-          };
-          
-          const newEvent = await this.service.createEvent(eventData);
-          res.status(201).json(newEvent);
-      } catch (err) {
-          console.error('Controller Error - createEvent:', err);
-          res.status(400).json({ error: err.message });
-      }
-  }
-
-  async deleteEvent(req, res) {
-      try {
-          const id_event = parseInt(req.params.id_event);
-          const created_by = req.user.nom_complet;
-          
-          await this.service.deleteEvent(id_event, created_by);
-          res.json({ success: true });
-      } catch (err) {
-          console.error('Controller Error - deleteEvent:', err);
-          res.status(400).json({ error: err.message });
-      }
-  }
+}
+        
     async sendModificationRequest(req, res) {
       try {
           const requestData = {

@@ -2,10 +2,40 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Radio, Table, Button, Card, Form, Select, Typography, Input, Alert } from 'antd';
+import html2canvas from 'html2canvas';
+import  jsPDF  from 'jspdf';
 
-const { Title, Text } = Typography;
 const { TextArea } = Input;
 
+type Theme = {
+  id: number;
+  id_presence: number;
+  nom: string;
+  lieu: string;
+  type_session: string;
+  etat: string;
+  entreprise_beneficiaire?: string;
+  nb_participants?: number;
+};
+
+type Participant = {
+  id_participant: number;
+  nom_complet: string;
+};
+
+type PresenceData = {
+  id_presence: number;
+  entreprise_beneficiaire: string;
+  date_debut: string;
+  date_fin: string;
+  id_session: number;
+  participants: Participant[];
+};
+
+type Evaluation = {
+  [key: string]: any; // Ou définissez un type plus précis pour les évaluations
+  observation?: string;
+};
 const AvisFormateur = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
@@ -16,11 +46,12 @@ const AvisFormateur = () => {
   // États pour stocker les données
   const [formateur, setFormateur] = useState(null);
   const [formateurNom, setFormateurNom] = useState('');
-  const [participants, setParticipants] = useState([]);
-  const [selectedTheme, setSelectedTheme] = useState(null);
-  const [themes, setThemes] = useState([]);
-  const [evaluations, setEvaluations] = useState({});
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [selectedTheme, setSelectedTheme] = useState<number | null>(null);
+  const [themes, setThemes] = useState<Theme[]>([]);
+  const [evaluations, setEvaluations] = useState<Record<number, Evaluation>>({});
   const [formData, setFormData] = useState({
+    id_presence: undefined,
     entreprise: '',
     formateur: '',
     organisme_formation: '',
@@ -55,17 +86,55 @@ const AvisFormateur = () => {
     { critere: 'Initiative', field: 'initiative' },
     { critere: 'Esprit de groupe', field: 'esprit_groupe' },
   ];
+  const generatePDF = async () => {
+    const input = document.getElementById('evaluation-content');
+    if (!input) return;
+
+    setLoading(true);
+    
+    try {
+      const canvas = await html2canvas(input, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210; // A4 width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save(`evaluation-${formData.theme}-${new Date().toISOString().slice(0,10)}.pdf`);
+      
+    } catch (error) {
+      console.error('Erreur génération PDF:', error);
+      setError('Erreur lors de la génération du PDF');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     const storedUserData = localStorage.getItem("user");
     if (storedUserData) {
+      try {
         const userData = JSON.parse(storedUserData);
-        setFormateur(userData.id_formateur);
-        setFormateurNom(userData.nom_complet); // Récupération du nom du formateur depuis le token
-        setFormData(prev => ({
-          ...prev,
-          formateur: userData.nom_complet // Initialisation du nom du formateur
-        }));
+        // Vérifiez que l'ID est bien un nombre
+        const formateurId = userData.id;
+        if (!isNaN(formateurId)) {
+          setFormateur(formateurId);
+          setFormateurNom(userData.nom_complet || '');
+          setFormData(prev => ({
+            ...prev,
+            formateur: userData.nom_complet || '',
+          }));
+        } else {
+          console.error("ID formateur invalide");
+        }
+      } catch (error) {
+        console.error("Erreur parsing user data", error);
+      }
     }
   }, []);
 
@@ -174,11 +243,11 @@ const AvisFormateur = () => {
     });
   };
 
-  const handleEvaluationChange = (participantId, field, value) => {
+  const handleEvaluationChange = (id_participant, field, value) => {
     setEvaluations(prev => ({
       ...prev,
-      [participantId]: {
-        ...prev[participantId],
+      [id_participant]: {
+        ...prev[id_participant],
         [field]: value
       }
     }));
@@ -190,48 +259,71 @@ const AvisFormateur = () => {
       setError(null);
       setSuccess(null);
   
+      // Validation des données
       if (!formData.id_presence) {
         throw new Error("ID de présence manquant");
       }
   
-      const token = localStorage.getItem('user');
-      const userData = JSON.parse(localStorage.getItem('user'));
+      
+      const token = localStorage.getItem('token'); // Utilisez 'token' au lieu de 'user'
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
   
+      // Vérification des évaluations
+      if (Object.keys(evaluations).length === 0) {
+        throw new Error("Aucune évaluation à enregistrer");
+      }
+  
+      const validEvaluations = Object.fromEntries(
+        Object.entries(evaluations)
+          .filter(([participantId]) => 
+            participants.some(p => p.id_participant.toString() === participantId)
+          )
+      );
+      
+      
       const dataToSend = {
-        id_formateur: userData.id_formateur,
+        id_formateur: userData.id,
         id_presence: formData.id_presence,
         organisme_formation: formData.organisme_formation,
-        evaluations
+        evaluations: validEvaluations
       };
+  
+      console.log('Données envoyées:', dataToSend); // Debug
   
       const response = await axios.post(
         `${import.meta.env.VITE_APP_API_URL}/apiUser/evaluation`,
         dataToSend,
-        { headers: { Authorization: `Bearer ${token}` } }
+        { 
+          headers: { 
+            'Authorization': `Bearer ${token}`,          } 
+        }
       );
   
       if (response.data.message) {
         setSuccess('Évaluations enregistrées avec succès!');
-  
-        // ✅ Réinitialisation des champs
+        await generatePDF();
         setEvaluations({});
         setFormData({
-          id_presence: '',
-          organisme_formation: ''
-          // Ajoute ici d'autres champs de formData si tu en as
+          entreprise: '',
+          formateur: userData.id ,
+          organisme_formation: '',
+          periode: '',
+          theme: '',
+          id_presence: undefined
         });
       }
   
-    } catch (err) {
-      console.error("Erreur d'enregistrement:", err);
-      setError(err.response?.data?.error || 'Erreur lors de l\'enregistrement des évaluations');
+    } catch (err: any) {
+      console.error("Erreur détaillée:", err.response?.data || err.message);
+      setError(err.response?.data?.message || err.message || 'Erreur lors de l\'enregistrement');
     } finally {
       setLoading(false);
     }
   };
-  
+
+
   return (
-    <div className="min-h-screen  bg-gray-50 p-4 md:p-8">
+    <div id="evaluation-content" className="min-h-screen  bg-gray-50 p-4 md:p-8">
       <div className="max-w-6xl pt-20 mx-auto bg-white rounded-lg shadow-md p-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-6">Formulaire d'évaluation des participants</h1>
         
@@ -256,11 +348,11 @@ const AvisFormateur = () => {
             disabled={loading}
           >
             <option value="">Sélectionnez un thème</option>
-            {themes.map(theme => (
-              <option key={theme.id} value={theme.id}>
-                {theme.nom} ({theme.lieu}, {theme.nb_participants} participants)
-              </option>
-            ))}
+            {themes.map((theme: Theme) => (
+    <option key={theme.id} value={theme.id}>
+      {theme.nom} ({theme.lieu}, {theme.nb_participants} participants)
+    </option>
+  ))}
           </select>
         </div>
         
@@ -376,4 +468,4 @@ const AvisFormateur = () => {
   );
 };
 
-export default AvisFormateur;
+export default AvisFormateur;   

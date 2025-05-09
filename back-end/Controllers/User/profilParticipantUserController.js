@@ -48,42 +48,41 @@ class ProfilParticipantUserController {
         }
     }
     async updateParticipantProfile(req, res) {
-            const { id_participant } = req.params;
+        try {
+            const { id } = req.params;
             const updateData = req.body;
-        
-            try {
-                // Validation basique
-                if (!id_participant || isNaN(id_participant)) {
-                    return res.status(400).json({
-                        success: false,
-                        message: 'ID participant invalide'
-                    });
-                }
-        
-                const result = await participantService.updateParticipantProfile(id_participant, updateData);
-        
-                res.json({
-                    success: true,
-                    message: result.message,
-                    data: {
-                        participant: result.participant,
-                        entreprise: result.entreprise,
-                        newEntrepriseId: result.newEntrepriseId
-                    }
-                });
-        
-            } catch (error) {
-                console.error('Controller Error - updateProfile:', error);
-        
-                const statusCode = error.message.includes('Validation error') ? 400 : 500;
-                
-                res.status(statusCode).json({
+    
+            // Validation basique
+            if (!id || isNaN(Number(id))) {
+                return res.status(400).json({
                     success: false,
-                    message: error.message,
-                    error: process.env.NODE_ENV === 'development' ? error.stack : undefined
+                    message: 'ID participant invalide'
                 });
             }
-        }  
+    
+            const result = await this.service.updateParticipantProfile(id, updateData);
+    
+            if (result.affectedRows === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Participant non trouvé'
+                });
+            }
+    
+            return res.json({
+                success: true,
+                message: result.message
+            });
+        } catch (error) {
+            console.error('Controller Error:', error);
+            
+            const status = error.message.includes('Validation error') ? 400 : 500;
+            return res.status(status).json({
+                success: false,
+                message: error.message
+            });
+        }
+    } 
 }
 
 module.exports = ProfilParticipantUserController;

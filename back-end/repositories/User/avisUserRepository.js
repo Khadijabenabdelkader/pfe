@@ -1,16 +1,15 @@
 const db = require('../../connect');
-const Avis = require('../../models/admin/avis_p');
-
+const Avis = require('../../models/admin/avis_p')
 class AvisUserRepository {
     async createAvis(avisData) {
         try {
             const query = `
-                INSERT INTO avis 
-                (id_participant, id_session, note, commentaire, adaptation_programme_vie_pro, 
-                moyens_pedagogiques_utilises, convenance_horaires_formation, apports_niveau_professionnel, 
-                qualite_documentation_distribuee, maitrise_globale_sujets_presentes, traitement_exemples_travail, 
-                animations_seances, homogeneite_groupe, satisfaction_attentes, duree_formation) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO avis_participant 
+        (id_participant, id_session, note, commentaire, adaptation_programme_vie_pro, 
+        moyens_pedagogiques_utilises, convenance_horaires_formation, apports_niveau_professionnel, 
+        qualite_documentation_distribuee, maitrise_globale_sujets_presentes, traitement_exemples_travail, 
+        animations_seances, homogeneite_groupe, satisfaction_attentes, duree_formation) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `;
 
             const result = await db.query(query, [
@@ -44,21 +43,28 @@ class AvisUserRepository {
     }
 
     async getSessionsByParticipant(id_participant) {
-        try {
+        return new Promise((resolve, reject) => {
             const query = `
-                SELECT s.id_session, s.theme, s.code, s.etat, s.id_formation, s.id_formateur
-                FROM session s
-                JOIN participant p ON FIND_IN_SET(s.id_session, p.id_session) > 0
-                WHERE p.id_participant = ?;
+                SELECT s.id_session, t.nom_theme, t.code, s.id_formation, s.id_formateur
+                FROM session_formation s
+                JOIN theme t on t.id_theme = s.id_theme
+                
+                JOIN feuille_presence_participants fpp ON FIND_IN_SET(s.id_session, fpp.id_session) > 0
+                JOIN participants p on p.id_participant=fpp.id_participant 
+                WHERE p.id_participant =?;
             `;
 
-            const results = await db.query(query, [id_participant]);
-            return results;
-
-        } catch (err) {
-            console.error('Repository Error - getSessionsByParticipant:', err);
-            throw err;
-        }
+            db.query(query, [id_participant], (err, results) => {
+                if (err) {
+                    console.error('Repository Error - getSessionsByParticipant:', err);
+                    return reject(err);
+                }
+                
+                // Convertir les résultats en format simple
+                const plainResults = JSON.parse(JSON.stringify(results));
+                resolve(plainResults);
+            });
+        });
     }
 }
 

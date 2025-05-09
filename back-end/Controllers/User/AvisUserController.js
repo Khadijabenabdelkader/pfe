@@ -36,27 +36,34 @@ class AvisUserController {
     async getSessions(req, res) {
         try {
             const { id_participant } = req.query;
+            
+            if (!id_participant) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'ID participant requis'
+                });
+            }
+
             const sessions = await this.service.getSessionsByParticipant(id_participant);
 
-            res.json({
+            // Formater la réponse pour éviter les problèmes de sérialisation
+            const response = {
                 success: true,
-                sessions
-            });
+                sessions: JSON.parse(JSON.stringify(sessions))
+            };
+
+            res.json(response);
 
         } catch (error) {
             console.error('Controller Error - getSessions:', error);
             
-            if (error.message.includes('requis')) {
-                res.status(400).json({
-                    success: false,
-                    message: error.message
-                });
-            } else {
-                res.status(500).json({
-                    success: false,
-                    message: 'Erreur lors de la récupération des sessions'
-                });
-            }
+            const status = error.message.includes('requis') ? 400 : 500;
+            const message = status === 400 ? error.message : 'Erreur lors de la récupération des sessions';
+            
+            res.status(status).json({
+                success: false,
+                message
+            });
         }
     }
 }

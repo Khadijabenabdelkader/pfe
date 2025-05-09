@@ -25,13 +25,16 @@ module.exports = (req, res, next) => {
   }
 };
 
-router.get('/themes', avisFormateurC.getThemesByFormateur);
+const controller = new avisFormateurC();
 
-router.get('/feuille-presence/:id_presence', avisFormateurC.getFeuillePresence);
 
-router.get('/participants', avisFormateurC.getParticipantsByPresence);
+router.get('/themes',(req, res) =>  controller.getThemesByFormateur(req, res));
 
-router.post('/evaluation', avisFormateurC.submitEvaluation);
+router.get('/feuille-presence/:id_presence',(req, res) =>  controller.getFeuillePresence(req, res));
+
+router.get('/participants',(req, res) =>  controller.getParticipantsByPresence(req, res));
+
+router.post('/evaluation',(req, res) =>  controller.submitEvaluation(req, res));
 
 
 module.exports = router;

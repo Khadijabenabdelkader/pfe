@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { saveAs } from "file-saver";
-import * as docx from "docx";
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 type Session = {
   id_session: number;
-  theme: string;
+  nom_theme: string;
   code: string;
   etat: string;
 };
@@ -66,12 +66,62 @@ const AvisParticipant = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const pdfRef = useRef<HTMLDivElement>(null);
 
+  const generatePDF = async () => {
+    if (!pdfRef.current) return;
+
+    setIsSubmitting(true);
+    
+    try {
+      // Configuration pour html2canvas
+      const canvas = await html2canvas(pdfRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: true,
+        windowWidth: pdfRef.current.scrollWidth,
+        windowHeight: pdfRef.current.scrollHeight
+      });
+
+      // Dimensions du PDF
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 190; // Largeur réduite pour les marges
+      const pageHeight = 277; // Hauteur A4 en mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      let heightLeft = imgHeight;
+      let position = 10; // Position verticale initiale
+      
+      // Ajout de la première page
+      pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Ajout de pages supplémentaires si nécessaire
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      // Enregistrement du PDF
+      const sessionName = sessions.find(s => s.id_session === Number(idSession))?.nom_theme || 'evaluation';
+      pdf.save(`evaluation-${sessionName}-${new Date().toISOString().slice(0,10)}.pdf`);
+
+    } catch (error) {
+      console.error('Erreur génération PDF:', error);
+      alert('Erreur lors de la génération du PDF');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   useEffect(() => {
     const storedUserData = localStorage.getItem("user");
     if (storedUserData) {
       const userData = JSON.parse(storedUserData);
-      setIdParticipant(userData.id_participant);
+      setIdParticipant(userData.id);
     }
   }, []);
 
@@ -83,20 +133,21 @@ const AvisParticipant = () => {
 
   const fetchSessions = async () => {
     try {
-      const url = `${import.meta.env.VITE_APP_API_URL}/apiUser/sessions?id_participant=${idParticipant}`;
-      const response = await axios.get(url);
-      
-      if (Array.isArray(response.data?.sessions)) {
-        setSessions(response.data.sessions);
-      } else {
-        console.error("Format de données inattendu pour les sessions");
-        setSessions([]);
-      }
+        const url = `${import.meta.env.VITE_APP_API_URL}/apiUser/sessions?id_participant=${idParticipant}`;
+        const response = await axios.get(url);
+        
+        // Vérification approfondie de la réponse
+        if (response.data?.success && Array.isArray(response.data.sessions)) {
+            setSessions(response.data.sessions);
+        } else {
+            console.error("Format de données inattendu pour les sessions");
+            setSessions([]);
+        }
     } catch (error) {
-      console.error("Erreur lors de la récupération des sessions :", error);
-      setSessions([]);
+        console.error("Erreur lors de la récupération des sessions :", error.response?.data || error.message);
+        setSessions([]);
     }
-  };
+};
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -135,66 +186,9 @@ const AvisParticipant = () => {
       });
     }
   };
-  const generateWordDocument = async () => {
-    const { Document, Paragraph, TextRun, HeadingLevel, Packer } = await import("docx");
-    
-    const doc = new Document({
-      sections: [
-        {
-          properties: {},
-          children: [
-            new Paragraph({
-              text: "Fiche d'évaluation de formation",
-              heading: HeadingLevel.HEADING_1,
-              spacing: { after: 200 },
-            }),
-            new Paragraph({
-              text: `Session évaluée: ${
-                sessions.find(s => s.id_session === Number(idSession))?.theme || ""
-              } (${sessions.find(s => s.id_session === Number(idSession))?.code || ""})`,
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              text: `Note globale: ${formData.note}/10`,
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              text: "Commentaire:",
-              heading: HeadingLevel.HEADING_2,
-              spacing: { after: 50 },
-            }),
-            new Paragraph({
-              children: [new TextRun(formData.commentaire || "Aucun commentaire")],
-              spacing: { after: 150 },
-            }),
-            new Paragraph({
-              text: "Évaluation des aspects pédagogiques:",
-              heading: HeadingLevel.HEADING_2,
-              spacing: { after: 50 },
-            }),
-            ...evaluationCriteria.map(criterion => 
-              new Paragraph({
-                text: `${criterion.label}: ${
-                  satisfactionLevels.find(l => l.value === formData[criterion.name])?.label || "Non évalué"
-                }`,
-                spacing: { after: 50 },
-              })
-            ),
-            new Paragraph({
-              text: `Durée de la formation: ${formData.duree_formation}`,
-              spacing: { after: 100 },
-            }),
-            new Paragraph({
-              text: `Date d'évaluation: ${new Date().toLocaleDateString()}`,
-            }),
-          ],
-        },
-      ],
-    });
+  
 
-    const blob = await Packer.toBlob(doc);
-    saveAs(blob, `evaluation-formation-${new Date().toISOString().split('T')[0]}.docx`);
-  }; 
+   
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -220,7 +214,7 @@ const AvisParticipant = () => {
         }
       );
       
-      await generateWordDocument();
+      await generatePDF();
 
       setSubmitSuccess(true);
       setFormData(defaultFormData);
@@ -245,7 +239,7 @@ const AvisParticipant = () => {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <div ref={pdfRef} className="max-w-3xl mx-auto p-6 bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-bold text-teal-600 mb-6 text-center">Fiche d'évaluation</h2>
       
       <form onSubmit={handleSubmit}>
@@ -268,7 +262,7 @@ const AvisParticipant = () => {
             <option value="">-- Choisir une session --</option>
             {sessions.map((session) => (
               <option key={session.id_session} value={session.id_session}>
-                {session.theme} ({session.code}) - {session.etat}
+                {session.nom_theme} ({session.code}) 
               </option>
             ))}
           </select>

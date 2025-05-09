@@ -57,6 +57,7 @@ const AvisParticipantRoute = require('./Routes/User/AvisParticipantRoute');
 const demanderFormationRoute = require('./Routes/User/demanderFormationRoute');
 const AvisFormateurRoute = require('./Routes/User/AvisFormateurRoute');
 const CalendrierFormationRoute = require('./Routes/User/CalendrierFormationRoute');
+const formateurCandidatureRoutes = require('./Routes/User/formateurCandidatureRoutes');
 // Routes admin
 
 app.use('/apiAdmin/catalogue',catalogueR);
@@ -85,6 +86,7 @@ app.use('/apiUser', AvisParticipantRoute);
 app.use('/apiUser', AvisFormateurRoute);
 app.use('/apiUser/demanderFormation',demanderFormationRoute);
 app.use('/apiUser/calendrierFormation',CalendrierFormationRoute);
+app.use('/apiUser/formateur-candidatures', formateurCandidatureRoutes);
 
 
 app.listen(PORT, () => {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-
+import CandidatureFormateur from '../formateur/CandidatureFormateur';
 const DemandesDeFormation = () => {
   const [demandes, setDemandes] = useState<any[]>([]);
   const [archivedDemandes, setArchivedDemandes] = useState<any[]>([]);
@@ -120,6 +120,10 @@ const DemandesDeFormation = () => {
             </tbody>
           </table>
         </div>
+      </div>
+      <div>
+
+      <CandidatureFormateur/>
       </div>
     </>
   );

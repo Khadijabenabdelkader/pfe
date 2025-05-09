@@ -1,6 +1,7 @@
 const ProfilFormateurUserRepository = require('../../repositories/User/profilFormateurUserRepository');
 const Formateur = require('../../models/admin/formateur');
 const Event = require('../../models/admin/evenement');
+const bcrypt = require('bcrypt');
 
 class ProfilFormateurUserService {
     constructor() {
@@ -105,59 +106,90 @@ class ProfilFormateurUserService {
     
         async updatePassword(id_formateur, oldPassword, newPassword) {
             try {
-                const storedPassword = await this.repository.verifyPassword(id_formateur);
-                if (!storedPassword) {
-                    throw new Error('Formateur not found');
-                }
-    
-                const isMatch = await bcrypt.compare(oldPassword, storedPassword);
-                if (!isMatch) {
-                    throw new Error('Current password is incorrect');
-                }
-    
-                const hashedPassword = await bcrypt.hash(newPassword, 10);
-                const updated = await this.repository.updatePassword(id_formateur, hashedPassword);
-                
-                if (!updated) {
-                    throw new Error('Password update failed');
-                }
-    
-                return true;
-            } catch (err) {
-                console.error('FormateurService Error - updatePassword:', err);
-                throw err;
+              // Validation des entrées
+              if (!id_formateur || !oldPassword || !newPassword) {
+                throw new Error('Tous les champs sont requis');
+              }
+        
+              // Récupération du mot de passe stocké
+              const storedPassword = await this.repository.verifyPassword(id_formateur);
+              if (!storedPassword) {
+                throw new Error('Formateur non trouvé');
+              }
+        
+              // Vérification de l'ancien mot de passe
+              const isMatch = await bcrypt.compare(oldPassword, storedPassword);
+              if (!isMatch) {
+                throw new Error('Mot de passe actuel incorrect');
+              }
+        
+              // Hash du nouveau mot de passe
+              const hashedPassword = await bcrypt.hash(newPassword, 10);
+              
+              // Mise à jour en base de données
+              const updated = await this.repository.updatePassword(id_formateur, hashedPassword);
+              if (!updated) {
+                throw new Error('Échec de la mise à jour du mot de passe');
+              }
+        
+              return true;
+            } catch (error) {
+              console.error('Service Error - updatePassword:', error);
+              throw error;
             }
+          }
+
+        async getEvents() {
+            try {
+              return await this.repository.getAllEvents();
+            } catch (error) {
+              console.error('Service Error - getEvents:', error);
+              throw new Error('Failed to fetch events');
+            }
+          }
+        
+          async createEvent(eventData) {
+            try {
+              if (!eventData.event || !eventData.date || !eventData.created_by) {
+                throw new Error('Missing required fields');
+              }
+        
+              return await this.repository.createEvent(
+                eventData.event,
+                eventData.date,
+                eventData.created_by
+              );
+            } catch (error) {
+              console.error('Service Error - createEvent:', error);
+              throw new Error(`Failed to create event: ${error.message}`);
+            }
+          }
+        
+          // Service
+async deleteEvent(id_event, nomComplet) {
+    try {
+        if (!nomComplet) {
+            throw new Error('Le nom du créateur est requis');
         }
 
-    async getEvents(nom_complet) {
-        try {
-            return await this.repository.getEvents(nom_complet);
-        } catch (err) {
-            console.error('Service Error - getEvents:', err);
-            throw err;
+        
+        const success = await this.repository.deleteEvent(id_event, nomComplet);
+        
+        if (!success) {
+            const exists = await this.repository.eventExists(id_event);
+            throw new Error(exists ? 'Non autorisé' : 'Événement non trouvé');
         }
+        
+        return { success: true };
+    } catch (error) {
+        console.error('Erreur service:', { 
+            error: error.message,
+            id_event,
+            nomComplet
+        });
+        throw error;
     }
-
-    async createEvent(eventData) {
-        try {
-            const event = new Event(eventData);
-            event.validate();
-            return await this.repository.createEvent(eventData);
-        } catch (err) {
-            console.error('Service Error - createEvent:', err);
-            throw err;
-        }
-    }
-
-    async deleteEvent(id_event, created_by) {
-        try {
-            return await this.repository.deleteEvent(id_event, created_by);
-        } catch (err) {
-            console.error('Service Error - deleteEvent:', err);
-            throw err;
-        }
-    }
-
+}
     async sendModificationRequest(requestData) {
         try {
             // Validation des données

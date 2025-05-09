@@ -8,7 +8,7 @@ import ima from "/monatech.png";
 import imag from "/somalec.png";
 import image from "/n.png"
 import Footer from "../Footer";
-
+import SoumettreCandidature from "./SoumettreCandidature";
 // Composant CountUp observable
 const ObservableCountUp = ({ end, duration = 2, ...props }) => {
   const [ref, inView] = useInView({
@@ -122,7 +122,7 @@ const Presentation: React.FC = () => {
           
           <div className="text-4xl font-semibold text-center text-emerald-500/80 mt-[-5.5rem] mb-4 ">           
             <h1 className="text-6xl backdrop-blur-sm bg-black/5 font-bold text-center  text-white/100 mb-20 rounded-lg">
-                Sac-consulting
+                Sac-Academy
             </h1>
             <br/>
             <p className="font-light text-2xl text-white mx-auto backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed">
@@ -321,6 +321,9 @@ const Presentation: React.FC = () => {
     </div>
   </div>
 </div>
+<br/><br/><br/>
+
+<SoumettreCandidature/>
           <br/><br/><br/>
           <ul className="mt-auto w-full w-screen relative left-1/2 right-1/2 mx-[-50vw]">
             <Footer/>

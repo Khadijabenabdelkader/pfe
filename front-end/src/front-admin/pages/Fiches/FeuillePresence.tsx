@@ -1,31 +1,31 @@
-import axios from 'axios';
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, HeadingLevel, AlignmentType } from "docx";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 interface Theme {
-  id: number;
-  theme: string;
-  formateur: string;
+  id_session: number;
+  theme_nom: string;
+  formateur_nom: string;
   date_debut: string;
   date_fin: string;
-  domaine: string;
-  nbj: number;
+  lieu: string;
+  duree: number;
+  mode?: string;
+  credit_import?: boolean | null;
+  emargement?: string | null;
+  droit_triage?: string | null;
+  nb_participant?: number;
 }
 
 interface Participant {
   id: number;
   nomPrenom: string;
-  CIN: number;
-  directionService: string;
-  entreprise: string;
+  CIN: string;
   emargements: Record<string, string>;
   mail?: string;
   telephone?: string;
-  nature_participant?: string;
-  matricule?: string;
-  adr_entreprise?: string;
-  email_entreprise?: string;
-  tel_entreprise?: string;
-  adresse?: string;
 }
 
 interface Formateur {
@@ -39,6 +39,7 @@ interface FormData {
   modeFormation: string;
   coOrganisateurs: string;
   lieuDeroulement: string;
+  duree: number;
   horaireDe: string;
   horaireA: string;
   pauseDe: string;
@@ -49,8 +50,8 @@ interface FormData {
   periodeDu?: string;
   periodeAu?: string;
 }
+
 const FeuillePresence = () => {
-  const [calendrierData, setCalendrierData] = useState<Theme[]>([]);
   const [filteredThemes, setFilteredThemes] = useState<Theme[]>([]);
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -60,10 +61,11 @@ const FeuillePresence = () => {
     modeFormation: '',
     coOrganisateurs: '',
     lieuDeroulement: '',
-    horaireDe: '',
-    horaireA: '',
-    pauseDe: '',
-    pauseA: '',
+    duree: 0,
+    horaireDe: '08:30',
+    horaireA: '17:00',
+    pauseDe: '12:00',
+    pauseA: '13:30',
     formateur: {
       nomPrenom: '',
       cin: '',
@@ -72,27 +74,320 @@ const FeuillePresence = () => {
   });
   const [showParticipantColumns, setShowParticipantColumns] = useState({
     CIN: true,
-    directionService: true,
-    entreprise: true,
     mail: true
   });
-  useEffect(() => {
-    axios.get(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/calendrierDetails`)
-      .then(response => {
-        setCalendrierData(response.data);
-        // Filtrer les thèmes non null
-        const themesWithData = response.data.filter((item: Theme) => item.theme !== null);
-        setFilteredThemes(themesWithData);
-      })
-      .catch(error => {
-        console.error("Erreur lors du chargement des thèmes :", error);
-      });
-  }, []);
 
+  const generatePDF = async () => {
+    try {
+      // Sélectionner l'élément à convertir en PDF
+      const element = document.getElementById("feuille-presence");
+      
+      if (!element) {
+        throw new Error("Élément introuvable pour la génération du PDF");
+      }
   
+      // Utiliser html2canvas pour capturer le contenu
+      const canvas = await html2canvas(element, {
+        scale: 2, // Améliore la qualité
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+      });
+  
+      // Calculer les dimensions du PDF
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+      });
+  
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 295; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+  
+      // Ajouter la première page
+      pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+  
+      // Ajouter des pages supplémentaires si nécessaire
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+  
+      // Télécharger le PDF
+      const fileName = `Feuille_Presence_${selectedTheme?.theme_nom.replace(/\s+/g, '_') || 'formation'}.pdf`;
+      pdf.save(fileName);
+  
+    } catch (error) {
+      console.error("Erreur lors de la génération du PDF:", error);
+      alert("Une erreur est survenue lors de la génération du PDF");
+    }
+  };
+
+  const generateWordDocument = () => {
+    if (!selectedTheme) return;
+  
+    // Création des paragraphes pour les informations de base
+    const title = new Paragraph({
+      text: "FEUILLE DE PRÉSENCE",
+      heading: HeadingLevel.HEADING_1,
+      alignment: AlignmentType.CENTER,
+      spacing: { after: 200 },
+    });
+  
+    const themeInfo = new Paragraph({
+      children: [
+        new TextRun({
+          text: `Thème de formation: ${selectedTheme.theme_nom}`,
+          bold: true,
+        }),
+      ],
+      spacing: { after: 100 },
+    });
+  
+    const dateInfo = new Paragraph({
+      children: [
+        new TextRun({
+          text: `Période: Du ${formatDateForDisplay(selectedTheme.date_debut)} au ${formatDateForDisplay(selectedTheme.date_fin)}`,
+        }),
+      ],
+      spacing: { after: 100 },
+    });
+  
+    const formateurInfo = new Paragraph({
+      children: [
+        new TextRun({
+          text: `Formateur: ${formData.formateur.nomPrenom}`,
+        }),
+      ],
+      spacing: { after: 100 },
+    });
+  
+    const lieuInfo = new Paragraph({
+      children: [
+        new TextRun({
+          text: `Lieu: ${formData.lieuDeroulement}`,
+        }),
+      ],
+      spacing: { after: 200 },
+    });
+  
+    // Création du tableau des participants
+    const participantRows = [
+      // En-tête du tableau
+      new TableRow({
+        children: [
+          new TableCell({ children: [new Paragraph("N°")], width: { size: 500, type: WidthType.DXA } }),
+          new TableCell({ children: [new Paragraph("Nom et Prénom")], width: { size: 3000, type: WidthType.DXA } }),
+          ...(showParticipantColumns.CIN ? [new TableCell({ children: [new Paragraph("CIN")], width: { size: 1500, type: WidthType.DXA } })] : []),
+          ...(showParticipantColumns.directionService ? [new TableCell({ children: [new Paragraph("Direction/Service")], width: { size: 2000, type: WidthType.DXA } })] : []),
+          ...(showParticipantColumns.entreprise ? [new TableCell({ children: [new Paragraph("Entreprise")], width: { size: 2000, type: WidthType.DXA } })] : []),
+          // Colonnes d'émargement
+          ...generateEmargementHeaders(),
+        ],
+      }),
+      // Lignes des participants
+      ...participants.map((participant, index) => 
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph((index + 1).toString())] }),
+            new TableCell({ children: [new Paragraph(participant.nomPrenom)] }),
+            ...(showParticipantColumns.CIN ? [new TableCell({ children: [new Paragraph(participant.CIN)] })] : []),
+            ...(showParticipantColumns.directionService ? [new TableCell({ children: [new Paragraph(participant.directionService)] })] : []),
+            ...(showParticipantColumns.entreprise ? [new TableCell({ children: [new Paragraph(participant.entreprise)] })] : []),
+            // Cellules d'émargement
+            ...generateEmargementCells(participant),
+          ],
+        })
+      ),
+    ];
+  
+    const participantsTable = new Table({
+      rows: participantRows,
+      width: { size: 100, type: WidthType.PERCENTAGE },
+    });
+  
+    // Création du document final
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          title,
+          themeInfo,
+          dateInfo,
+          formateurInfo,
+          lieuInfo,
+          new Paragraph({
+            text: "Liste des participants:",
+            bold: true,
+            spacing: { before: 200, after: 100 },
+          }),
+          participantsTable,
+          // Ajoutez d'autres éléments comme les signatures si nécessaire
+        ],
+      }],
+    });
+  
+    return doc;
+  };
+  
+  // Fonction utilitaire pour formater la date
+  const formatDateForDisplay = (dateString: string) => {
+    const date = parseCustomDate(dateString);
+    if (!date) return '';
+    return date.toLocaleDateString('fr-FR');
+  };
+  
+  // Fonction pour générer les en-têtes d'émargement
+  const generateEmargementHeaders = () => {
+    if (!selectedTheme) return [];
+    
+    const headers = [];
+    const startDate = parseCustomDate(selectedTheme.date_debut);
+    const endDate = parseCustomDate(selectedTheme.date_fin);
+    
+    if (!startDate || !endDate) return [];
+    
+    const currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+      headers.push(
+        new TableCell({
+          children: [new Paragraph(formatDateForDisplay(currentDate.toISOString()))],
+          width: { size: 1500, type: WidthType.DXA },
+        })
+      );
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return headers;
+  };
+  
+  // Fonction pour générer les cellules d'émargement
+  const generateEmargementCells = (participant: Participant) => {
+    if (!selectedTheme) return [];
+    
+    const cells = [];
+    const startDate = parseCustomDate(selectedTheme.date_debut);
+    const endDate = parseCustomDate(selectedTheme.date_fin);
+    
+    if (!startDate || !endDate) return [];
+    
+    const currentDate = new Date(startDate);
+    
+    while (currentDate <= endDate) {
+      const dateKey = currentDate.toISOString().split('T')[0];
+      cells.push(
+        new TableCell({
+          children: [new Paragraph(participant.emargements[dateKey] || '')],
+        })
+      );
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return cells;
+  };
+
+  // Récupérer les détails de la session
+  const fetchSessionDetails = async (idSession: number) => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/session/${idSession}`);
+      const { session, participants } = response.data.data;
+      
+      // Mapper les données de la session
+      setSelectedTheme({
+        id_session: session.id_session,
+        theme_nom: session.theme_nom,
+        formateur_nom: session.formateur_nom,
+        date_debut: session.date_debut,
+        date_fin: session.date_fin,
+        duree: session.duree,
+        lieu: session.lieu
+      });
+
+      // Mapper les participants
+      const mappedParticipants = participants.map((p: any) => ({
+        id: p.id,
+        nomPrenom: p.nom_complet,
+        CIN: p.CIN,
+        mail: p.mail || '',
+        telephone: p.telephone || '',
+        emargements: p.emargement ? JSON.parse(p.emargement) : generateEmargementDays(session.date_debut, session.date_fin),
+        // Autres champs si nécessaire
+      }));
+
+      setParticipants(mappedParticipants);
+
+      // Mettre à jour formData
+      setFormData(prev => ({
+        ...prev,
+        themeFormation: session.id_session,
+        lieuDeroulement: session.lieu,
+        periodeDu: formatDateForInput(session.date_debut), // Use formatted date
+        periodeAu: formatDateForInput(session.date_fin),formateur: {
+          nomPrenom: session.formateur_nom,
+          cin: '' // À récupérer si disponible
+        },
+        horaireDe: session.horaire_debut || '',
+        horaireA: session.horaire_fin || '',
+        modeFormation: session.mode || '',
+        droitTirage: session.droit_tirage || '',
+        creditImpôt: session.credit_import === '1'
+      }));
+
+    } catch (error) {
+      console.error("Erreur lors du chargement de la session:", error);
+    }
+  };
+  const formatDateForInput = (dateString: string): string => {
+    const date = parseCustomDate(dateString);
+    if (!date) return '';
+    
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+  };
+  useEffect(() => {
+    const loadThemes = async () => {
+      try {
+        const response = await axios.get(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/sessions`);
+        console.log('Réponse API:', response.data); // Debug
+        
+        // Adaptez selon la structure réelle de votre réponse
+        const themesData = response.data.data || response.data;
+        setFilteredThemes(themesData);
+      } catch (error) {
+        console.error("Erreur lors du chargement des thèmes:", error);
+      }
+    };
+    loadThemes();
+  }, []);
+  const parseCustomDate = (dateString: string): Date | null => {
+    if (!dateString) return null;
+    
+    // Essayer le format DD/MM/YYYY
+    const parts = dateString.split('/');
+    if (parts.length === 3) {
+      return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+    }
+    
+    // Essayer le format ISO
+    const date = new Date(dateString);
+    if (!isNaN(date.getTime())) return date;
+    
+    console.error("Format de date non reconnu:", dateString);
+    return null;
+  };
   const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const themeId = parseInt(e.target.value);
-    const theme = filteredThemes.find(t => t.id === themeId) || null;
+    const theme = filteredThemes.find(t => t.id_session === themeId) || null;
     setSelectedTheme(theme);
     
     setFormData(prev => ({
@@ -103,10 +398,11 @@ const FeuillePresence = () => {
       periodeAu: theme?.date_fin ? theme.date_fin.split('T')[0] : '',
       formateur: {
         ...prev.formateur,
-        nomPrenom: theme?.formateur || ''
+        nomPrenom: theme?.formateur_nom || ''
       }
     }));
   };
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prevData => ({
@@ -125,7 +421,9 @@ const FeuillePresence = () => {
       }
     }));
   };
-
+  const removeParticipant = (id: number) => {
+    setParticipants(prev => prev.filter(p => p.id !== id));
+  };
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setFormData(prevData => ({
@@ -133,130 +431,168 @@ const FeuillePresence = () => {
       [name]: checked,
     }));
   };
-  const addParticipant = () => {
-    setParticipants(prevParticipants => [
-      ...prevParticipants,
-      { 
-        id: Date.now(), // Utilisation d'un timestamp pour un ID unique
-        nomPrenom: '', 
-        CIN: 0 , 
-        directionService: '', 
-        entreprise: '', 
-        emargements: generateEmargementDays() 
-      },
+
+const addParticipant = () => {
+    if (!selectedTheme) return;
+    
+    setParticipants(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        nomPrenom: '',
+        CIN: '',
+        emargements: generateEmargementDays(selectedTheme.date_debut, selectedTheme.date_fin)
+      }
     ]);
   };
-  const removeParticipant = (id: number) => {
-    setParticipants(prev => prev.filter(p => p.id !== id));
-  };
-  const generateEmargementDays = (): Record<string, string> => {
-    if (!selectedTheme) return {};
-    
+  const generateEmargementDays = (startDateStr: string, endDateStr: string): Record<string, string> => {
     const emargements: Record<string, string> = {};
-    const startDate = new Date(selectedTheme.date_debut);
-    const endDate = new Date(selectedTheme.date_fin);
+    const startDate = parseCustomDate(startDateStr);
+    const endDate = parseCustomDate(endDateStr);
+  
+    if (!startDate || !endDate) {
+      console.error("Dates invalides pour générer les émargements");
+      return {};
+    }
+  
+    const currentDate = new Date(startDate);
     
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-        const dateStr = d.toISOString().split('T')[0];
-        emargements[dateStr] = ''; // Initialise avec une chaîne vide
+    while (currentDate <= endDate) {
+      const dateKey = currentDate.toISOString().split('T')[0];
+      emargements[dateKey] = '';
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     
     return emargements;
-};
+  };
+  // Modifier la soumission pour correspondre au backend
   const handleFormSubmit = async () => {
     try {
-      if (!selectedTheme) throw new Error("Veuillez sélectionner un thème de formation");
-      if (participants.length === 0) throw new Error("Au moins un participant doit être ajouté");
-  
-      // Validation des participants
-      const invalidParticipants = participants.filter(p => !p.CIN);
-      if (invalidParticipants.length > 0) {
-        throw new Error(`Les participants suivants n'ont pas de CIN: ${
-          invalidParticipants.map(p => p.nomPrenom).join(', ')
-        }`);
-      }
-  
-      const payload = {
-        creditImpôt: formData.creditImpôt ? 1 : 0,
-        droitTirage: formData.droitTirage,
-        modeFormation: formData.modeFormation,
-        coOrganisateurs: formData.coOrganisateurs || '',
-        horaire_debut: formData.horaireDe,
-        horaire_fin: formData.horaireA,
-        pause_debut: formData.pauseDe,
-        pause_fin: formData.pauseA,
-        entreprise_beneficiaire: formData.entrepriseBeneficiaire || '',
-        idCalendrier: selectedTheme.id,
-        participants: participants.map(p => ({
-          CIN: p.CIN, // Notez la correspondance entre cin (front) et CIN (back)
-          nomComplet: p.nomPrenom,
-          mail: p.mail || '',
-          telephone: p.telephone || '',
-          emargements: p.emargements || generateEmargementDays(),
-          direction_service: p.directionService || '',
-          nom_entreprise: p.entreprise || '',
-          nature_participant: p.nature_participant || 'interne',
-          matricule: p.matricule || '',
-          adr_entreprise: p.adr_entreprise || '',
-          email_entreprise: p.email_entreprise || '',
-          tel_entreprise: p.tel_entreprise || '',
-          adresse: p.adresse || ''
-        }))
-      };
-  
-      const response = await axios.post(
-        `${import.meta.env.VITE_APP_API_URL}/apiAdmin/feuillePresence`, 
-        payload,
-        { 
-          headers: { 'Content-Type': 'application/json' },
-          validateStatus: () => true // Pour gérer manuellement les erreurs
+        // Validation
+        if (!selectedTheme?.id_session) {
+            throw new Error("Veuillez sélectionner une session");
         }
-      );
-  
-      if (response.status === 201 && response.data.success) {
-        alert('Feuille de présence enregistrée avec succès !');
-        // Réinitialisation du formulaire
-        setFormData({
-          creditImpôt: false,
-          droitTirage: '',
-          modeFormation: '',
-          coOrganisateurs: '',
-          horaireDe: '',
-          horaireA: '',
-          pauseDe: '',
-          pauseA: '',
-          entrepriseBeneficiaire: '',
-          lieuDeroulement: '',
-          formateur: {
-            nomPrenom: '',
-            cin: ''
-          }
-        });
-        setParticipants([]);
-        setSelectedTheme(null);
-      } else {
-        throw new Error(response.data.error || "Erreur lors de l'enregistrement");
-      }
+
+        if (!participants.length) {
+            throw new Error("Veuillez ajouter au moins un participant");
+        }
+
+        // Construction du payload
+        const payload = {
+          id_session: selectedTheme.id_session, // <-- Nom conforme au backend
+            participants: participants.map(p => ({
+                CIN: p.CIN,
+                nomComplet: p.nomPrenom, // <-- Nom conforme au backend
+                mail: p.mail || null,
+                telephone: p.telephone || null,
+                emargements: p.emargements || {},
+            })),
+            creditImpôt: formData.creditImpôt,
+            droitTirage: formData.droitTirage,
+            modeFormation: formData.modeFormation,
+            coOrganisateurs: formData.coOrganisateurs,
+            entreprise_beneficiaire: formData.entrepriseBeneficiaire
+        };
+
+        console.log('Envoi du payload:', payload);
+
+        // Envoi à l'API
+        const response = await axios.post(
+            `${import.meta.env.VITE_APP_API_URL}/apiAdmin/participations`, // <-- Endpoint corrigé
+            payload,
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                timeout: 10000
+            }
+        );
+
+        console.log('Réponse API:', response.data);
+
+        // Vérification de la réponse
+        if (!response.data.success) {
+            throw new Error(response.data.error || "Erreur serveur");
+        }
+
+        // Mise à jour des IDs des participants
+        const apiResults = response.data.data?.results || [];
+        if (apiResults.length > 0) {
+            const updatedParticipants = participants.map(p => {
+                const match = apiResults.find((r: any) => r.CIN === p.CIN);
+                return match?.id_participant 
+                    ? { ...p, id: match.id_participant }
+                    : p;
+            });
+            setParticipants(updatedParticipants);
+        }
+
+        alert(response.data.data?.message || "Enregistrement réussi");
+
+    
+    
+    
+    
+        const doc = generateWordDocument();
+    
+    // Utiliser docx pour exporter le document
+    const { Packer } = await import('docx');
+    const blob = await Packer.toBlob(doc);
+    
+    // Créer un lien de téléchargement
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Feuille_Presence_${selectedTheme.theme_nom.replace(/\s+/g, '_')}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Erreur lors de l'envoi des données:", error);
-      alert(`Erreur: ${error instanceof Error ? error.message : 'Une erreur est survenue'}`);
-    }
-  };
+      console.error('Erreur complète:', {
+          message: error.message,
+          response: error.response?.data
+      });
+
+      let errorMessage = error.message;
+      if (error.response?.data?.error) {
+          errorMessage = error.response.data.error;
+      } else if (error.response?.data?.message) {
+          errorMessage = error.response.data.message;
+      }
+
+      alert(`Erreur: ${errorMessage}`);
+  }
+};
   const renderEmargementColumns = () => {
     if (!selectedTheme) return null;
     
+    const startDate = parseCustomDate(selectedTheme.date_debut);
+    const endDate = parseCustomDate(selectedTheme.date_fin);
+  
+    if (!startDate || !endDate) {
+      console.error("Dates invalides:", selectedTheme.date_debut, selectedTheme.date_fin);
+      return null;
+    }
+  
     const columns = [];
-    const startDate = new Date(selectedTheme.date_debut);
-    const endDate = new Date(selectedTheme.date_fin);
+    const currentDate = new Date(startDate);
     
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const dateStr = d.toLocaleDateString('fr-FR');
+    while (currentDate <= endDate) {
+      const dateKey = currentDate.toISOString().split('T')[0];
+      const formattedDate = currentDate.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+  
       columns.push(
-        <th key={dateStr} className="border p-2">
+        <th key={dateKey} className="border p-2">
           <div className="flex justify-between items-center">
-            <span>Journée du {dateStr}</span>
+            <span>Journée du {formattedDate}</span>
             <button 
-              onClick={() => handleRemoveEmargementColumn(d.toISOString().split('T')[0])}
+              onClick={() => handleRemoveEmargementColumn(dateKey)}
               className="text-red-500 text-xs"
             >
               ×
@@ -264,6 +600,8 @@ const FeuillePresence = () => {
           </div>
         </th>
       );
+  
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     
     return columns;
@@ -279,15 +617,19 @@ const FeuillePresence = () => {
   };
 
 
-  const renderEmargementCells = (participant:Participant) => {
+  const renderEmargementCells = (participant: Participant) => {
     if (!selectedTheme) return null;
     
+    const startDate = parseCustomDate(selectedTheme.date_debut);
+    const endDate = parseCustomDate(selectedTheme.date_fin);
+  
+    if (!startDate || !endDate) return null;
+  
     const cells = [];
-    const startDate = new Date(selectedTheme.date_debut);
-    const endDate = new Date(selectedTheme.date_fin);
+    const currentDate = new Date(startDate);
     
-    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-      const dateKey = d.toISOString().split('T')[0];
+    while (currentDate <= endDate) {
+      const dateKey = currentDate.toISOString().split('T')[0];
       cells.push(
         <td key={dateKey} className="border p-2">
           <input 
@@ -304,11 +646,11 @@ const FeuillePresence = () => {
           />
         </td>
       );
+      currentDate.setDate(currentDate.getDate() + 1);
     }
     
     return cells;
   };
-
   const toggleParticipantColumn = (column: keyof typeof showParticipantColumns) => {
     setShowParticipantColumns(prev => ({
       ...prev,
@@ -318,7 +660,7 @@ const FeuillePresence = () => {
 
   
   return (
-    <div className="container mx-auto p-4 font-sans">
+    <div id="feuille-presence" className="container mx-auto p-4 font-sans">
       <h1 className="text-2xl font-bold text-center mb-6">Feuille de Présence</h1>
       
       {/* Section Crédit d'impôt et Droits de tirage */}
@@ -399,22 +741,19 @@ const FeuillePresence = () => {
       {/* Section Thème et Informations */}
       <div className="mb-6 p-4 border rounded">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block font-bold mb-1">Thème de Formation :</label>
-            <select 
-              name="themeFormation"
-              value={formData.themeFormation || ''} 
-              onChange={handleThemeChange} 
-              className="w-full p-2 border rounded"
-            >
-              <option value="">Sélectionner un thème</option>
-              {filteredThemes.map(theme => (
-                <option key={theme.id} value={theme.id}>
-                  {theme.theme} (Formateur: {theme.formateur || 'Non spécifié'})
-                </option>
-              ))}
-            </select>
-          </div>
+        <select 
+  name="themeFormation"
+  value={formData.themeFormation || ''} 
+  onChange={handleThemeChange} 
+  className="w-full p-2 border rounded"
+>
+  <option value="">Sélectionner un thème</option>
+  {filteredThemes.map(theme => (
+    <option key={theme.id_session} value={theme.id_session}>
+      {theme.theme_nom} (Formateur: {theme.formateur_nom || 'Non spécifié'})
+    </option>
+  ))}
+</select>
           
           <div>
             <label className="block font-bold mb-1">Lieu de déroulement :</label>
@@ -434,28 +773,32 @@ const FeuillePresence = () => {
             <div className="flex items-center">
               <span className="mr-2">Du :</span>
               <input 
-                type="date" 
-                name="periodeDu"
-                value={formData.periodeDu} 
-                onChange={handleChange} 
-                className="p-2 border rounded"
-              />
+  type="date" 
+  name="periodeDu"
+  value={formatDateForInput(formData.periodeDu || '')} 
+  onChange={handleChange} 
+  className="p-2 border rounded"
+/>
               <span className="mx-2">Au :</span>
               <input 
-                type="date" 
-                name="periodeAu"
-                value={formData.periodeAu} 
-                onChange={handleChange} 
-                className="p-2 border rounded"
-              />
+  type="date" 
+  name="periodeAu"
+  value={formatDateForInput(formData.periodeAu || '')} 
+  onChange={handleChange} 
+  className="p-2 border rounded"
+/>
             </div>
           </div>
           
           <div>
             <label className="block font-bold mb-1">Durée :</label>
-            <div className="p-2 bg-gray-100 rounded">
-              {selectedTheme?.nbj || 0} jour(s)
-            </div>
+            <input 
+              type="text" 
+              name="duree"
+              value={formData.duree} 
+              onChange={handleChange} 
+              className="w-full p-2 border rounded"
+            />
           </div>
         </div>
         
@@ -517,18 +860,7 @@ const FeuillePresence = () => {
       >
         {showParticipantColumns.CIN ? 'Masquer CIN' : 'Afficher CIN'}
       </button>
-      <button 
-        onClick={() => toggleParticipantColumn('directionService')} 
-        className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm"
-      >
-        {showParticipantColumns.directionService ? 'Masquer Direction' : 'Afficher Direction'}
-      </button>
-      <button 
-        onClick={() => toggleParticipantColumn('entreprise')} 
-        className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm"
-      >
-        {showParticipantColumns.entreprise ? 'Masquer Entreprise' : 'Afficher Entreprise'}
-      </button>
+      
     </div>
   </div>
   
@@ -540,8 +872,6 @@ const FeuillePresence = () => {
           <th className="py-3 px-8 text-left border">Nom et Prénom</th>
           {showParticipantColumns.CIN && <th className="py-3 px-8 text-left border">N° CIN</th>}
           {showParticipantColumns.mail && <th className="py-3 px-8 text-left border">Email</th>}
-          {showParticipantColumns.directionService && <th className="py-3 px-10 text-left border">Direction / Service</th>}
-          {showParticipantColumns.entreprise && <th className="py-3 px-8 text-left border">Entreprise</th>}
           {selectedTheme && renderEmargementColumns()}
           <th className="py-3 px-6 text-center border">Actions</th>
         </tr>
@@ -594,34 +924,7 @@ const FeuillePresence = () => {
                 />
               </td>
             )}
-            {showParticipantColumns.directionService && (
-              <td className="py-3 px-2 border">
-                <input 
-                  type="text" 
-                  value={participant.directionService} 
-                  onChange={(e) => {
-                    const updatedParticipants = [...participants];
-                    updatedParticipants[index].directionService = e.target.value;
-                    setParticipants(updatedParticipants);
-                  }} 
-                  className="w-full p-2 border rounded-md"
-                />
-              </td>
-            )}
-            {showParticipantColumns.entreprise && (
-              <td className="py-3 px- border">
-                <input 
-                  type="text" 
-                  value={participant.entreprise} 
-                  onChange={(e) => {
-                    const updatedParticipants = [...participants];
-                    updatedParticipants[index].entreprise = e.target.value;
-                    setParticipants(updatedParticipants);
-                  }} 
-                  className="w-full p-2 border rounded-md"
-                />
-              </td>
-            )}
+            
             {selectedTheme && renderEmargementCells(participant)}
 
             <td className="py-3 px-6 text-center border">

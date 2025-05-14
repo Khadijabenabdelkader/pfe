@@ -33,7 +33,7 @@ const getEvaluationLabel = (note) => {
 };
 
 const ChartOne = () => {
-  const [sessions, setSessions] = useState<{ id_session: number }[]>([]);
+ /* const [sessions, setSessions] = useState<{ id_session: number }[]>([]);
   const [sessionAvis, setSessionAvis] = useState<{ id_session: number; moyenne_note: number; moyenne_adaptation: number; moyenne_pedagogie: number; moyenne_satisfaction: number; nombre_avis: number; }[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -217,7 +217,7 @@ const ChartOne = () => {
         </>
       )}
     </div>
-  );
+  );*/
 };
 
 export default ChartOne;

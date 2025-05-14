@@ -1,4 +1,4 @@
-const statsService = require('../../services/admin/statsService');
+/*const statsService = require('../../services/admin/statsService');
 
 class StatsController {
   async getAdminStats(req, res) {
@@ -34,4 +34,4 @@ class StatsController {
   }
 }
 
-module.exports = new StatsController();
+module.exports = new StatsController();*/

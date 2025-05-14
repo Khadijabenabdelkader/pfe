@@ -12,4 +12,6 @@ router.get('/Form',  (req, res) => catalogueController.getFormation(req, res));
 router.get('/sessions', (req, res) => catalogueController.getSession(req, res));
 router.post('/send-email', (req, res) => catalogueController.sendMail(req, res));
 router.get('/fiche/:id_fichePrg', (req, res) => catalogueController.getfichePrg(req, res));
+router.get('/theme/:id_theme', (req, res) => catalogueController.getFormateursByTheme(req, res));
+
 module.exports = router;

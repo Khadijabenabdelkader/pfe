@@ -37,7 +37,7 @@ const authRoutes = require('./Routes/Admin/authRoutes');
 const accesRoutes = require('./Routes/Admin/accesRoutes');
 const calendrierRoutes = require('./Routes/Admin/calendrierEventRoute');
 const clientRoutes = require('./Routes/Admin/clientRoutes');
-const chartRoutes = require('./Routes/Admin/chartRoutes');
+//const chartRoutes = require('./Routes/Admin/chartRoutes');
 const demanderFormationRoutes = require('./Routes/Admin/DemanderFormationRoute');
 const calendrierFormationRoutes = require('./Routes/Admin/calendrierFormationRoutes');
 const feuillePresenceRoutes = require('./Routes/Admin/FeuillePresenceRoutes');
@@ -45,6 +45,8 @@ const avisP = require('./Routes/Admin/avisParticipantRoutes');
 const avisF= require('./Routes/Admin/avisFormateurRoutes');
 const calForm = require('./Routes/Admin/calendrierFormationRoutes');
 const catalogueR= require('./Routes/Admin/catalogueRoutes');
+const domaineAdminRoutes = require('./Routes/Admin/domaineRoutes')
+const commandeRouter = require('./Routes/Admin/CommandeRouter');
 // Importation des routes utilisateur
 
 const formateurRoute = require('./Routes/User/formateursRoute'); // Using require for consistency
@@ -66,15 +68,20 @@ app.use('/apiAdmin/formations', formationRoutes);
 app.use('/apiAdmin/admin', adminRoutes);
 app.use('/apiAdmin/auth', authRoutes);
 app.use('',accesRoutes);
-app.use('/apiAdmin/calendrierEvent', calendrierRoutes);
+//app.use('/apiAdmin/calendrierEvent', calendrierRoutes);
+app.use('/api/calendrier', calendrierRoutes);
+
 app.use('/apiAdmin',clientRoutes);
-app.use('/apiAdmin', chartRoutes);
+app.use('/api/commandes', commandeRouter);
+
+//app.use('/apiAdmin', chartRoutes);
 app.use('/apiAdmin/demanderFormation',demanderFormationRoutes);
 app.use('/apiAdmin',calendrierFormationRoutes);
 app.use('/apiAdmin', feuillePresenceRoutes);
 app.use('/apiAdmin/avis',avisP);
 app.use('/apiAdmin/avis',avisF);
 app.use('/apiAdmin',calForm);
+app.use('/apiAdmin',domaineAdminRoutes);
 // Routes utilisateur
 app.use('/apiUser/formateurs', formateurRoute);
 app.use('/apiUser/formations',catalogueRoute);

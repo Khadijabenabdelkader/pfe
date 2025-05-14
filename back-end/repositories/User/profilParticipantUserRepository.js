@@ -13,6 +13,7 @@ class ProfilParticipantUserRepository {
     p.adresse AS adresse, 
     p.CIN AS CIN,
     p.id_entreprise AS id_entreprise,
+    p.Badge As badge,
     e.nom_entreprise AS nom_entreprise,
     e.tel_entreprise AS tel_entreprise,
     e.email_entreprise AS email_entreprise,
@@ -33,8 +34,12 @@ WHERE p.id_participant = ?`;
                     return resolve(new Participant({})); // Retourne un formateur vide
                 }
                 
-                resolve(new Participant(results[0]));
-            });
+                const participantData = {
+                    ...results[0],
+                    badge: results[0].badge // Assurez-vous que ce champ est inclus
+                  };
+
+                  resolve(new Participant(participantData));            });
         });
     }
     async updateParticipantProfile(id_participant, updateData) {

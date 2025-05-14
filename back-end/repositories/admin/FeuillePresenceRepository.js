@@ -1,35 +1,8 @@
 const db = require('../../connect');
 const Participant = require('../../models/admin/participant');
+const Participation = require('../../models/admin/Participation');
 class FeuillePresenceRepository {
-    constructor() {
-        this.initTable();
-      }
-      
-      async initTable() {
-        try {
-            const createTableQuery = `
-                CREATE TABLE IF NOT EXISTS participations (
-                    id_session INT NOT NULL,
-                    id_participant INT NOT NULL,
-                    credit_import VARCHAR(255) NULL,
-                    emargement TEXT NULL,
-                    droit_triage VARCHAR(255) NULL,
-                    present BOOLEAN DEFAULT FALSE,
-                    date_emargement DATETIME NULL,
-                    evaluation VARCHAR(50) NULL,
-                    commentaires TEXT NULL,
-                    PRIMARY KEY (id_session, id_participant),
-                    FOREIGN KEY (id_session) REFERENCES session_formation(id_session),
-                    FOREIGN KEY (id_participant) REFERENCES participants(id_participant)
-                )`;
-            
-            await db.query(createTableQuery);
-            console.log('Table participations initialisée avec succès');
-        } catch (error) {
-            console.error('Erreur lors de l\'initialisation de la table participations:', error);
-            throw error;
-        }
-    }
+
 
     // Récupérer les détails d'une session avec ses participants
     async getSessionDetails(idSession) {
@@ -38,12 +11,12 @@ class FeuillePresenceRepository {
                 SELECT 
                     s.*, 
                     f.nom_complet AS formateur_nom, 
-                    th.nom_theme AS theme_nom,
+                    th.theme AS theme_nom,
                     s.lieu,
                     s.date_debut,
                     s.date_fin,
                     s.duree
-                FROM session_formation s
+                FROM session s
                 JOIN formateur f ON s.id_formateur = f.id_formateur
                 JOIN theme th ON s.id_theme = th.id_theme
                 WHERE s.id_session = ?
@@ -74,12 +47,12 @@ class FeuillePresenceRepository {
                 SELECT 
                     s.*, 
                     f.nom_complet AS formateur_nom, 
-                    th.nom_theme AS theme_nom,
+                    th.theme AS theme_nom,
                     s.lieu,
                     s.date_debut,
                     s.date_fin,
                     s.duree
-                FROM session_formation s
+                FROM session s
                 JOIN formateur f ON s.id_formateur = f.id_formateur
                 JOIN theme th ON s.id_theme = th.id_theme
                 ORDER BY s.date_debut DESC

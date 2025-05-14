@@ -20,6 +20,7 @@ interface Participant {
   CIN?: string | null;
   id_entreprise?: number | null;
   entreprise?: Entreprise;
+  badge?: string; 
 }
 
 const ProfilParticipant: React.FC = () => {
@@ -32,45 +33,53 @@ const ProfilParticipant: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-        try {
-            const storedUser = localStorage.getItem("user");
-            if (!storedUser) {
-                navigate("/");
-                return;
-            }
-
-            const userData = JSON.parse(storedUser);
-            
-            const response = await axios.get(
-                `${import.meta.env.VITE_APP_API_URL}/apiUser/participants/${userData.id}`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${userData.token}`,
-                    },
-                }
-            );
-
-            // Structurez explicitement les données
-            setParticipant({
-                id_participant: response.data.id_participant,
-                nom_complet: response.data.nom_complet,
-                mail: response.data.mail,
-                telephone: response.data.telephone,
-                adresse: response.data.adresse,
-                CIN: response.data.CIN,
-                id_entreprise: response.data.id_entreprise,
-                entreprise: response.data.entreprise || null
-            });
-        } catch (error) {
-            console.error("Erreur lors du chargement:", error);
-            setError("Impossible de charger les données du profil");
-        } finally {
-            setLoading(false);
+      try {
+        const storedUser = localStorage.getItem("user");
+        if (!storedUser) {
+          navigate("/");
+          return;
         }
+  
+        const userData = JSON.parse(storedUser);
+        
+        const response = await axios.get(
+          `${import.meta.env.VITE_APP_API_URL}/apiUser/participants/${userData.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${userData.token}`,
+            },
+          }
+        );
+  
+        console.log("Données complètes reçues:", response.data);
+        
+        // Normalisation des données
+        const participantData = {
+          ...response.data,
+          badge: response.data.badge || response.data.Badge || userData.badge || null
+        };
+  
+        setParticipant({
+          id_participant: participantData.id_participant,
+          nom_complet: participantData.nom_complet,
+          mail: participantData.mail,
+          telephone: participantData.telephone,
+          adresse: participantData.adresse,
+          CIN: participantData.CIN,
+          id_entreprise: participantData.id_entreprise,
+          entreprise: participantData.entreprise || null,
+          badge: participantData.badge // Utilisation du badge normalisé
+        });
+      } catch (error) {
+        console.error("Erreur lors du chargement:", error);
+        setError("Impossible de charger les données du profil");
+      } finally {
+        setLoading(false);
+      }
     };
-
+  
     fetchData();
-}, [navigate]);
+  }, [navigate]);
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setParticipant(prev => prev ? { ...prev, [name]: value } : null);
@@ -183,10 +192,23 @@ const handleSubmit = async (e: React.FormEvent) => {
       {error && <div className="p-3 mb-4 text-red-700 bg-red-100 rounded-md">{error}</div>}
       {success && <div className="p-3 mb-4 text-green-700 bg-green-100 rounded-md">{success}</div>}
 
+      {participant.badge && participant.badge.toLowerCase() === "special" && (
+  <div className="mt-4 p-4  text-gray-600 rounded">
+    <p className="font-semibold">Profil spécial</p>
+    <p className="text-teal-600">Ce participant bénéficie de privilèges particuliers.</p>
+    <ul className="mt-2 list-disc pl-5">
+      <li>Accès prioritaire aux formations</li>
+      <li>Tarifs préférentiels</li>
+      <li>Support dédié</li>
+    </ul>
+  </div>
+)}
       {isEditing ? (
         <form onSubmit={handleSubmit} className="space-y-4">
+         
           <div className='backdrop-blur-sm bg-black/5 p-6 rounded-lg leading-relaxed flex-1'>
             <div>
+            
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Nom Complet*</label>
               <input
                 type="text"

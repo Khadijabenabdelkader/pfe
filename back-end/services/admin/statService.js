@@ -1,4 +1,4 @@
-const statsRepository = require('../../repositories/admin/statsRepository');
+/*const statsRepository = require('../../repositories/admin/statsRepository');
 
 class StatsService {
   async getAdminStats() {
@@ -20,4 +20,4 @@ class StatsService {
   }
 }
 
-module.exports = new StatsService();
+module.exports = new StatsService();*/

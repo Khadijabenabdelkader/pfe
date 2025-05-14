@@ -1,4 +1,4 @@
-const db = require('../../connect');
+/*const db = require('../../connect');
 
 class StatsRepository {
   async getAdminStats() {
@@ -39,4 +39,4 @@ class StatsRepository {
   }
 }
 
-module.exports = new StatsRepository();
+module.exports = new StatsRepository();*/

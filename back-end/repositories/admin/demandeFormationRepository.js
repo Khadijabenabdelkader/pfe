@@ -3,7 +3,7 @@ const db = require('../../connect');
 class DemandeFormationRepository {
   async getAll() {
     return new Promise((resolve, reject) => {
-      db.query('SELECT * FROM demande_de_formation_personnalisee', (err, results) => {
+      db.query('SELECT * FROM demande_de_formation_personnalise', (err, results) => {
         if (err) {
           console.error('Erreur DB:', err);
           return reject(err);

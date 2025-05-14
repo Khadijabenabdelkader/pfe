@@ -1,41 +1,39 @@
-const catalogueRepository = require('../../repositories/admin/catalogueRepository');
+const CatalogueRepository = require('../../repositories/admin/catalogueRepository');
 
 class CatalogueService {
-  async getCatalogue() {
-    const rawData = await catalogueRepository.getFullCatalogue();
-    
-    // Transformez les données comme dans votre code original
-    const formationsMap = new Map();
-    rawData.forEach(row => {
-        if (!formationsMap.has(row.id_formation)) {
-          formationsMap.set(row.id_formation, {
-            id_formation: row.id_formation,
-            domaine: row.domaine,
-            sessions: []
-          });
-        }
-  
-        const formation = formationsMap.get(row.id_formation);
-        let session = formation.sessions.find(s => s.id_session === row.id_session);
-  
-        if (row.id_session && !session) {
+ static async getCatalogue() {
+    const results = await CatalogueRepository.fetchCatalogue();
+    const domainesMap = new Map();
+
+    results.forEach((row) => {
+      if (!domainesMap.has(row.id_formation)) {
+        domainesMap.set(row.id_formation, {
+          id_formation: row.id_formation,
+          domaine: row.domaine,
+          sessions: [],
+        });
+      }
+
+      const catalogue = domainesMap.get(row.id_formation);
+      if (row.id_theme) {
+        let session = catalogue.sessions.find((s) => s.id_theme === row.id_theme);
+
+        if (!session) {
           session = {
-            id_session: row.id_session,
+            id_theme: row.id_theme,
             theme: row.theme,
             code: row.code,
-            fiche_prg: row.fiche_prg,
-            cours: row.cours,
-            formateurs: []
+            formateurs: [],
           };
-          formation.sessions.push(session);
+          catalogue.sessions.push(session);
         }
-  
-        if (row.id_formateur && session) {
+
+        if (row.id_formateur) {
           try {
-            const themesFormateur = row.themes_a_enseigner 
+            const themesFormateur = row.themes_a_enseigner
               ? JSON.parse(row.themes_a_enseigner)
               : {};
-            
+
             if (themesFormateur[row.theme]) {
               const formateur = {
                 id_formateur: row.id_formateur,
@@ -49,14 +47,10 @@ class CatalogueService {
                 cv: row.cv,
                 niveau_etude: row.niveau_etude,
                 nb_experience: row.nb_experience,
-                rang: themesFormateur[row.theme]
+                rang: themesFormateur[row.theme],
               };
-  
-              const formateurExists = session.formateurs.some(
-                f => f.id_formateur === row.id_formateur
-              );
-              
-              if (!formateurExists) {
+
+              if (!session.formateurs.some((f) => f.id_formateur === row.id_formateur)) {
                 session.formateurs.push(formateur);
                 session.formateurs.sort((a, b) => a.rang - b.rang);
               }
@@ -65,36 +59,61 @@ class CatalogueService {
             console.error("Error parsing themes_a_enseigner:", e);
           }
         }
-      });    
-    return Array.from(formationsMap.values());
+      }
+    });
+
+    return Array.from(domainesMap.values());
   }
 
-  async getFormateursBySession(id_session) {
-    const data = await catalogueRepository.getFormateursBySession(id_session);
-    if (!data) throw new Error('Session non trouvée');
-    
+  static async getFormateursBySession(id_theme) {
+    const sessionResults = await CatalogueRepository.fetchThemeById(id_theme);
+    if (!sessionResults || sessionResults.length === 0) {
+      throw new Error(`Aucune theme trouvée pour l'ID ${id_theme}`);
+    }
+
+    const sessionTheme = sessionResults[0].theme;
+    const formateurs = await CatalogueRepository.fetchFormateursByTheme(sessionTheme);
+
+    const result = formateurs.map((formateur) => {
+      let rang = 1;
+      try {
+        const themes = JSON.parse(formateur.themes_a_enseigner);
+        rang = themes[sessionTheme];
+      } catch (e) {
+        console.error("Erreur parsing themes_a_enseigner:", e);
+      }
+
+      return {
+        id_formateur: formateur.id_formateur,
+        nom_complet: formateur.nom_complet,
+        rang: rang,
+      };
+    });
+
     return {
-      id_session: parseInt(id_session),
-      theme: data.session.theme,
-      formateurs: data.formateurs.map(f => ({
-        id_formateur: f.id_formateur,
-        nom_complet: f.nom_complet,
-        rang: f.themes_a_enseigner[data.session.theme] || 1
-      }))
+      success: true,
+      id_theme: parseInt(id_theme, 10),
+      theme: sessionTheme,
+      formateurs: result,
     };
   }
 
-  async updateDomain(id_formation, updateData) {
-    return catalogueRepository.updateDomain(
-      id_formation, 
-      updateData.formation, 
-      updateData.sessions
-    );
+
+ static async addThemeToDomain(domaineName, abbreviation, themes) {
+    return await CatalogueRepository.addThemeToDomain(domaineName, abbreviation, themes);
   }
 
-  async addThemeToDomain(domaineName, themesData) {
-    return catalogueRepository.addThemeToDomain(domaineName, themesData.themes,themesData.code);
+  static async deleteDomain(id_formation) {
+    return await CatalogueRepository.deleteDomain(id_formation);
+  }
+
+  static async deleteTheme(id_domaine, id_theme) {
+    return await CatalogueRepository.deleteTheme(id_domaine, id_theme);
+  }
+
+  static async updateTheme(id_theme, formateursToAdd, formateursToRemove) {
+    return await CatalogueRepository.updateTheme(id_theme, formateursToAdd, formateursToRemove);
   }
 }
 
-module.exports = new CatalogueService();
+module.exports = CatalogueService;

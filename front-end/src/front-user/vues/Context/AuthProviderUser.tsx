@@ -7,6 +7,7 @@ interface User {
   nom_complet: string;
   mail: string;
   isFormateur: boolean;
+  badge?: string;
 }
 
 export const AuthContext = createContext<any | null>(null);

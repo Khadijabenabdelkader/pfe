@@ -38,6 +38,17 @@ class CatalogueUserService {
         }
         return this.catalogueRepository.sendEmail(subject, body, email);
     }
+
+    async getFormateursByTheme(id_theme) {
+        try {
+            if (!id_theme) {
+                throw new Error('ID du thème requis');
+            }
+            return await this.catalogueRepository.getFormateursByTheme(id_theme);
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = CatalogueUserService;

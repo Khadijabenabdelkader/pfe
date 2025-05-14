@@ -8,7 +8,7 @@ class AvisRepository {
 
   async initTable() {
     const createTableQuery = `
-      CREATE TABLE IF NOT EXISTS avis (
+      CREATE TABLE IF NOT EXISTS avis_participant (
         id_avis INT PRIMARY KEY AUTO_INCREMENT,
         id_session INT NOT NULL,
         id_participant INT NOT NULL,
@@ -47,16 +47,17 @@ class AvisRepository {
     return new Promise((resolve, reject) => {
       const sql = `
         SELECT 
-          avis.id_avis, avis.id_session, avis.id_participant, avis.commentaire, avis.note,
+          avis.id_avis, avis.id_session, p.nom_complet, avis.commentaire, avis.note,
           avis.date_creation, avis.adaptation_programme_vie_pro,
           avis.moyens_pedagogiques_utilises, avis.convenance_horaires_formation,
           avis.apports_niveau_professionnel, avis.qualite_documentation_distribuee,
           avis.maitrise_globale_sujets_presentes, avis.traitement_exemples_travail,
           avis.animations_seances, avis.homogeneite_groupe,
           avis.satisfaction_attentes, avis.duree_formation,
-          participant.nom_complet, participant.nature_participant, participant.nom_entreprise
-        FROM avis
-        JOIN participant ON avis.id_participant = participant.id_participant
+          e.nom_entreprise
+        FROM avis_participant avis
+        JOIN participants  p ON avis.id_participant = p.id_participant
+        join entreprise e on e.id_entreprise = p.id_entreprise
         WHERE avis.id_session = ?`;
       
       db.query(sql, [idSession], (err, results) => {
@@ -67,7 +68,7 @@ class AvisRepository {
         
         // Convertir les résultats en objets Avis
         const avisList = results.map(row => new Avis(row));
-        resolve(avisList);
+        resolve(results);
       });
     });
   }
@@ -75,7 +76,7 @@ class AvisRepository {
   async checkSessionExists(idSession) {
     return new Promise((resolve, reject) => {
       db.query(
-        'SELECT 1 FROM session WHERE id_session = ? LIMIT 1', 
+        'SELECT * FROM session WHERE id_session = ? LIMIT 1', 
         [idSession],
         (err, results) => {
           if (err) return reject(err);
@@ -88,7 +89,7 @@ class AvisRepository {
   async checkParticipantExists(idParticipant) {
     return new Promise((resolve, reject) => {
       db.query(
-        'SELECT 1 FROM participant WHERE id_participant = ? LIMIT 1',
+        'SELECT p.*, e.* FROM participants p JOIN entreprise e ON e.id_entreprise = p.id_entreprise WHERE p.id_participant = ?',
         [idParticipant],
         (err, results) => {
           if (err) return reject(err);

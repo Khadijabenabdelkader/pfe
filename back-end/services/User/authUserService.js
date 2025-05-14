@@ -9,7 +9,8 @@ class AuthService {
             id: isFormateur ? user.id_formateur : user.id_participant,
             nom_complet: user.nom_complet,
             isFormateur,
-            role: isFormateur ? 'formateur' : 'participant'
+            role: isFormateur ? 'formateur' : 'participant',
+            badge: isFormateur ? null : user.badge
           },
           process.env.SECRET_KEY,
           { expiresIn: '1h' }
@@ -76,6 +77,7 @@ class AuthService {
               nom_complet: participant.nom_complet,
               mail: participant.mail,
               telephone: participant.telephone,
+              badge: participant.badge
               // ... autres champs participants
             }
           };

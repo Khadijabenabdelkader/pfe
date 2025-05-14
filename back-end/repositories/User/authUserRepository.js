@@ -181,7 +181,7 @@ async updateParticipantPassword(id, hashedPassword) {
       const hashedPwd = await bcrypt.hash(participantData.pwd, 10);
       const result = await db.query(
         `INSERT INTO participants 
-        (nom_complet, mail, pwd, telephone, adresse, nature_participant, id_entreprise)
+        (nom_complet, mail, pwd, telephone, adresse, id_entreprise, Badge)
         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
           participantData.nom_complet,
@@ -190,7 +190,8 @@ async updateParticipantPassword(id, hashedPassword) {
           participantData.telephone,
           participantData.adresse,
           participantData.nature_participant,
-          participantData.id_entreprise || null
+          participantData.id_entreprise || null,
+          'normal'
         ]
       );
       return result.insertId;

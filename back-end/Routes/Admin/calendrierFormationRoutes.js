@@ -1,4 +1,4 @@
-const express = require('express');
+/*const express = require('express');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 const { createCalendrierformation,
@@ -37,4 +37,15 @@ router.post('/create/calendrierformation', createCalendrierformation);
 router.delete('/:id', verifyToken, deleteCalendrierFormation);
 router.delete('/calendrier/:id_cal/session/:id_session', deleteSessionFromCalendrier);
 router.post('/calendrier/:id_cal/session', addSessionToCalendrier);
+module.exports = router;
+
+*/
+const express = require('express');
+const router = express.Router();
+const{ getDomainesWithSessions,getCalendarSessions, calendrierFormation, deletSessionFromCalendrier}= require('../../Controllers/Admin/calendrierFormationController');
+router.post("/sessions/save", calendrierFormation);
+router.get("/calendrier", getDomainesWithSessions);
+router.get("/SessionCalendrier", getCalendarSessions);
+router.delete('/sessions/:id',deletSessionFromCalendrier) 
+
 module.exports = router;

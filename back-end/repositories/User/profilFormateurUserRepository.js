@@ -184,13 +184,13 @@ async getSessionsByStatus(id_formateur, status) {
         const query = `
             SELECT 
                 s.id_session, 
-                t.nom_theme, 
+                t.theme, 
                 t.code, 
-                d.nom_domaine, 
+                d.domaine, 
                 s.etat, 
                 s.type_session, 
                 s.fiche_prg  
-            FROM session_formation s
+            FROM session s
             JOIN formations f ON s.id_formation = f.id_formation
             JOIN formateur frm ON s.id_formateur = frm.id_formateur
             JOIN theme t ON s.id_theme = t.id_theme

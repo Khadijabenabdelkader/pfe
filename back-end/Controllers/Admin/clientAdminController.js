@@ -1,92 +1,55 @@
-const db = require('../../connect');
+const clientService = require('../../services/admin/clientService');
 
-const getClientsPersonnes = (req, res) => {
-  const query = `
-    SELECT 
-      p.nom_complet, 
-      p.telephone, 
-      p.mail, 
-      p.adresse, 
-      s.theme 
-    FROM 
-      participant p
-    JOIN 
-      session s ON p.id_session = s.id_session
-    WHERE 
-      p.nature_participant = 'personne';
-  `;
-  
-  db.query(query, (err, results) => {
-    if (err) {
-      console.error("Erreur lors de la récupération des clients personnes:", err);
-      return res.status(500).json({ error: 'Erreur serveur' });
-    }
+const getClientsPersonnes = async (req, res) => {
+  try {
+    const results = await clientService.getClientsPersonnes();
     res.json(results);
-  });
+  } catch (error) {
+    console.error("Erreur lors de la récupération des clients personnes:", error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
 };
-const getClientsEntreprises = (req, res) => {
-    const query = `
-      SELECT 
-    p.nom_entreprise, 
-    p.telephone AS telephone_entreprise, 
-    p.email_entreprise, 
-    p.adr_entreprise AS adresse_entreprise, 
-    p.matricule,
-    GROUP_CONCAT(DISTINCT s.theme SEPARATOR ', ') AS themes
-FROM 
-    participant p
-JOIN 
-    session s ON p.id_session = s.id_session
-WHERE 
-    p.nature_participant = 'entreprise'
-GROUP BY 
-    p.matricule;
 
-    `;
-    
-    db.query(query, (err, results) => {
-      if (err) {
-        console.error("Erreur lors de la récupération des clients entreprises:", err);
-        return res.status(500).json({ error: 'Erreur serveur' });
-      }
-      res.json(results);
-    });
-  };
-  
-  // Récupérer les participants pour une entreprise spécifique
-  const getParticipantsByEntreprise = (req, res) => {
+const getClientsEntreprises = async (req, res) => {
+  try {
+    const results = await clientService.getClientsEntreprises();
+    res.json(results);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des clients entreprises:", error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
+
+const getParticipantsByEntreprise = async (req, res) => {
+  try {
     const { entrepriseName } = req.params;
-    const query = `
-      SELECT 
-    p.nom_complet, 
-    p.telephone, 
-    p.mail, 
-    p.adresse,
-    GROUP_CONCAT(DISTINCT s.theme SEPARATOR ', ') AS themes
-FROM 
-    participant p
-JOIN 
-    session s ON p.id_session = s.id_session
-WHERE 
-    p.nature_participant = 'entreprise' 
-    AND p.nom_entreprise = ?
-GROUP BY 
-    p.nom_complet, p.telephone, p.mail, p.adresse;
+    const results = await clientService.getParticipantsByEntreprise(entrepriseName);
+    res.json(results);
+  } catch (error) {
+    console.error("Erreur lors de la récupération des participants:", error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+};
 
-    `;
-    
-    db.query(query, [entrepriseName], (err, results) => {
-      if (err) {
-        console.error("Erreur lors de la récupération des participants:", err);
-        return res.status(500).json({ error: 'Erreur serveur' });
-      }
-      res.json(results);
+const badgeParticipant = async (req, res) => {
+  try {
+    const { id_participant } = req.params;
+    const { badge } = req.body;
+    const result = await clientService.badgeParticipant(id_participant, badge);
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du badge:", error);
+    res.status(500).json({ 
+      success: false, 
+      message: "Erreur serveur lors de la mise à jour du badge", 
+      error: error.message 
     });
-  };
-    
+  }
+};
 
 module.exports = {
   getClientsPersonnes,
   getClientsEntreprises,
-  getParticipantsByEntreprise
+  getParticipantsByEntreprise,
+  badgeParticipant
 };

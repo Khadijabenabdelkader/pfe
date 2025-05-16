@@ -41,7 +41,6 @@ router.get('apiUser/formateur/details/:id_formateur', getFormateurDetails);
 router.put('apiUser/formateur/details/:id_formateur', updatePassword);
 
 const authenticateToken = (req, res, next) => {
-    console.log("Token reçu dans la requête :", req.headers.authorization);
   
     if (!req.headers.authorization) {
       return res.status(401).json({ error: "Token manquant" });

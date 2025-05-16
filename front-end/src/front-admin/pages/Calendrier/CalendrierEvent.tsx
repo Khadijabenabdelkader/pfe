@@ -5,8 +5,7 @@ import interactionPlugin from '@fullcalendar/interaction/index.js';
 import frLocale from '@fullcalendar/core/locales/fr.js';
 import axios from 'axios';
 import { useAuth } from '../../hooks/useAuthAdmin';
-import Calendrier from '../../../front-user/vues/ProfilFormateur/Calendrier';
-/*
+
 const Calendrier: React.FC = () => {
   const { user } = useAuth();
   const [events, setEvents] = useState<any[]>([]);
@@ -18,17 +17,15 @@ const Calendrier: React.FC = () => {
 
   // Function to fetch events from API
   const fetchEvents = () => {
-    axios.get(`${import.meta.env.VITE_APP_API_URL}/api/calendrier`)
-          .then(response => {
+    axios.get(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/calendrierEvent/get`)
+      .then(response => {
         const formattedEvents = response.data.map((event: any) => ({
-          id: event.id_event,
-      title: event.title || event.event, // Gère les deux noms possibles
+          id: event.id,
+          title: event.title,
           start: event.date,
           created_by: event.created_by,
           extendedProps: {
             created_by: event.created_by,
-        id_event: event.id_event // Ajoutez explicitement id_event
-
           },
         }));
         setEvents(formattedEvents);
@@ -39,12 +36,9 @@ const Calendrier: React.FC = () => {
   // Gérer la création d'un nouvel événement
   const handleDateClick = (info: any) => {
     const title = prompt("Entrez le titre de l'événement :");
-    
     if (title) {
-      axios.post(`${import.meta.env.VITE_APP_API_URL}/api/calendrier`, 
-                { title, date: info.dateStr, created_by: user.nom_admin }, 
-{
-        headers: { Authorization: `${localStorage.getItem('user')}` }
+      axios.post(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/calendrierEvent/create`, { title, date: info.dateStr, created_by: user.nom_admin }, {
+        headers: { Authorization: `${localStorage.getItem('token')}` }
       })
       .then(response => {
         fetchEvents();
@@ -55,7 +49,7 @@ const Calendrier: React.FC = () => {
 
   // Gérer la suppression d'un événement
   const handleEventClick = (info: any) => {
-    const token = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
   
     if (!token) {
       alert('Vous devez être connecté pour effectuer cette action.');
@@ -64,7 +58,7 @@ const Calendrier: React.FC = () => {
   
     if (info.event.extendedProps.created_by === user.nom_admin) {
       if (window.confirm(`Voulez-vous supprimer l'événement : "${info.event.title}" ?`)) {
-        axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/calendrier/${info.event.id}`, {
+        axios.delete(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/calendrierEvent/${info.event.id}`, {
           headers: { 
             Authorization: `Bearer ${token}`
           }
@@ -118,5 +112,4 @@ const Calendrier: React.FC = () => {
   );
 };
 
-export default Calendrier;*/
-<Calendrier/>
+export default Calendrier;

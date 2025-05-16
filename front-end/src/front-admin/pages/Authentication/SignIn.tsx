@@ -53,7 +53,7 @@ const SignIn = () => {
   
         // Passe directement les données de la réponse à login
         login(response.data);
-        navigate('/Admin/formations');
+        navigate('/Admin/chart');
       } else {
         setError('Les informations d\'utilisateur sont invalides.');
       }

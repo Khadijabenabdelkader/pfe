@@ -39,8 +39,7 @@ router.delete('/calendrier/:id_cal/session/:id_session', deleteSessionFromCalend
 router.post('/calendrier/:id_cal/session', addSessionToCalendrier);
 module.exports = router;
 
-*/
-const express = require('express');
+*/const express = require('express');
 const router = express.Router();
 const{ getDomainesWithSessions,getCalendarSessions, calendrierFormation, deletSessionFromCalendrier}= require('../../Controllers/Admin/calendrierFormationController');
 router.post("/sessions/save", calendrierFormation);

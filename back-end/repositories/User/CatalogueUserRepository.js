@@ -112,13 +112,10 @@ class CatalogueUserRepository {
                     t.theme AS theme,
                     t.code
                 FROM 
-                    domaine d
-                LEFT JOIN 
-                    formations f ON d.id_domaine = f.id_domaine
-                LEFT JOIN 
-                    session s ON f.id_formation = s.id_formation
+                    theme t
+               
                 LEFT JOIN
-                    theme t ON s.id_theme = t.id_theme
+                    domaine d ON d.id_domaine = t.id_domaine
                 WHERE
                     t.id_theme IS NOT NULL
                 GROUP BY

@@ -98,8 +98,8 @@ class FormationAdminRepository {
                         `INSERT INTO session (
                             id_theme, etat, mode, lieu, id_formation,
                             id_formateur, fiche_prg, cours_session, type_session,
-                            nb_participant, genre, date_debut, date_fin, duree, createdAt
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                            nb_participant, genre, duree, createdAt
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                         [
                             id_theme,
                             session.etat || 'planifiée',
@@ -112,8 +112,6 @@ class FormationAdminRepository {
                              session.type_session || 'Présentiel',
                             session.nb_participants || 0,
                             session.genre || 'normal',
-                            session.date_debut || new Date(),
-                            session.date_fin || new Date(),
                             session.duree || 0,
                             new Date()
                         ]

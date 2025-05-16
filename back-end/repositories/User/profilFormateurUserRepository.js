@@ -250,7 +250,7 @@ async updatePassword(id_formateur, hashedPassword) {
 
 async getAllEvents() {
     return new Promise((resolve, reject) => {
-      db.query('SELECT * FROM event', (err, results) => {
+      db.query('SELECT * FROM calendrier', (err, results) => {
         if (err) {
           console.error('Repository Error - getAllEvents:', err);
           return reject(new Error('Database error while fetching events'));
@@ -260,9 +260,40 @@ async getAllEvents() {
     });
   }
 
+  async getEventsByUser(created_by) {
+  return new Promise((resolve, reject) => {
+    db.query('SELECT * FROM calendrier WHERE created_by = ?', [created_by], (err, results) => {
+      if (err) {
+        console.error('Repository Error - getEventsByUser:', err); // Correction du nom de la méthode dans le log
+        return reject(new Error('Database error while fetching user events'));
+      }
+      resolve(results);
+    });
+  });
+}
+
+    /*async getAllEvents(created_by = null) {
+        return new Promise((resolve, reject) => {
+            let query = 'SELECT * FROM event';
+            const params = [];
+            
+            if (created_by) {
+                query += ' WHERE created_by = ?';
+                params.push(created_by);
+            }
+
+            db.query(query, params, (err, results) => {
+                if (err) {
+                    console.error('Repository Error - getAllEvents:', err);
+                    return reject(new Error('Database error while fetching events'));
+                }
+                resolve(results);
+            });
+        });
+    }*/
   async createEvent(event, date, created_by) {
     return new Promise((resolve, reject) => {
-      const query = 'INSERT INTO event (event, date, created_by) VALUES (?, ?, ?)';
+      const query = 'INSERT INTO calendrier (title, date, created_by) VALUES (?, ?, ?)';
       
       db.query(query, [event, date, created_by], (err, result) => {
         if (err) {
@@ -282,7 +313,7 @@ async getAllEvents() {
 
   async deleteEvent(id_event, created_by) {
     return new Promise((resolve, reject) => {
-      const query = 'DELETE FROM event WHERE id_event = ? AND created_by = ?';
+      const query = 'DELETE FROM calendrier WHERE id = ? AND created_by = ?';
       db.query(query, [id_event, created_by], (err, result) => {
         if (err) return reject(err);
         resolve(result.affectedRows > 0);

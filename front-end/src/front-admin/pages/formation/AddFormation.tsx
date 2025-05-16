@@ -67,27 +67,21 @@ const AddFormation: React.FC<AddFormationProps> = ({ onClose, onFormationAdded }
 
     // Charger les domaines avec leurs IDs
     axios.get(`${import.meta.env.VITE_APP_API_URL}/apiAdmin/domaine/Domains`)
-      .then(response => {
-        let domainesData = [];
-        
-        if (typeof response.data === 'string') {
-          domainesData = response.data.split('\n')
-            .filter(Boolean)
-            .map((domaine, index) => ({ 
-              id_domaine: index + 1, 
-              domaine 
-            }));
-        } else if (Array.isArray(response.data)) {
-          domainesData = response.data;
-        }
-        
-        setFormations(domainesData);
-      })
-      .catch(error => {
-        console.error("Erreur domaines:", error);
+    .then(response => {
+      if (Array.isArray(response.data)) {
+        // Utilisez directement les données si elles sont dans un tableau structuré
+        setFormations(response.data); // Exemple [{ id_domaine: 1, domaine: "Informatique" }]
+        console.log("Domaines récupérés :", response.data);
+      } else {
+        console.error("Format inattendu pour les domaines :", response.data);
         setFormations([]);
-      });
-  }, []);
+      }
+    })
+    .catch(error => {
+      console.error("Erreur lors de la récupération des domaines :", error);
+      setFormations([]);
+    });
+}, []);
 
   useEffect(() => {
     if (selectedDomaineId) {

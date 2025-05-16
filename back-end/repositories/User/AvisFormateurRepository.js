@@ -6,7 +6,7 @@ class AvisFormateurRepository {
       const sql = `
         SELECT 
     s.id_session AS id, 
-    t.nom_theme AS nom, 
+    t.theme AS nom, 
     s.lieu, 
     s.type_session, 
     s.etat, 
@@ -14,7 +14,7 @@ class AvisFormateurRepository {
     fp.entreprise_beneficiaire, 
     COUNT(DISTINCT fpp.id_participant) AS nb_participants 
 FROM 
-    session_formation s 
+    session s 
 JOIN 
     formateur f ON s.id_formateur = f.id_formateur 
 JOIN 
@@ -26,7 +26,7 @@ LEFT JOIN
 WHERE 
     f.id_formateur = ?
 GROUP BY 
-    s.id_session, fp.id_presence, fp.entreprise_beneficiaire, t.nom_theme, s.lieu, s.type_session, s.etat
+    s.id_session, fp.id_presence, fp.entreprise_beneficiaire, t.theme, s.lieu, s.type_session, s.etat
 ORDER BY 
     s.id_session DESC;
       `;

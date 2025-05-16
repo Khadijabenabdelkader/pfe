@@ -2,57 +2,40 @@ const eventRepository = require('../../repositories/admin/calendrierEventReposit
 const Event = require('../../models/admin/evenement');
 
 class EventService {
-  async getEvents() {
-            try {
-              return await eventRepository.getAllEvents();
-            } catch (error) {
-              console.error('Service Error - getEvents:', error);
-              throw new Error('Failed to fetch events');
-            }
-          }
-        
-          async createEvent(eventData) {
-            try {
-              if (!eventData.event || !eventData.date || !eventData.created_by) {
-                throw new Error('Missing required fields');
-              }
-        
-              return await eventRepository.createEvent(
-                eventData.event,
-                eventData.date,
-                eventData.created_by
-              );
-            } catch (error) {
-              console.error('Service Error - createEvent:', error);
-              throw new Error(`Failed to create event: ${error.message}`);
-            }
-          }
-        
-          // Service
-async deleteEvent(id_event, nomComplet) {
+  async getAllEvents() {
     try {
-        if (!nomComplet) {
-            throw new Error('Le nom du créateur est requis');
-        }
-
-        
-        const success = await eventRepository.deleteEvent(id_event, nomComplet);
-        
-        if (!success) {
-            const exists = await eventRepository.eventExists(id_event);
-            throw new Error(exists ? 'Non autorisé' : 'Événement non trouvé');
-        }
-        
-        return { success: true };
+      const events = await eventRepository.getAll();
+      return events;
     } catch (error) {
-        console.error('Erreur service:', { 
-            error: error.message,
-            id_event,
-            nomComplet
-        });
-        throw error;
+      console.error('Erreur dans EventService.getAllEvents:', error);
+      throw new Error('Échec de la récupération des événements');
     }
+  }
 
+  async createEvent(title, date, createdBy) {
+    try {
+      const event = new Event({ title, date, created_by: createdBy });
+      return await eventRepository.create(title, date, createdBy);
+    } catch (error) {
+      console.error('Erreur dans EventService.createEvent:', error);
+      throw error;
+    }
+  }
+
+  async deleteEvent(id, createdBy) {
+    try {
+      if (!createdBy) {
+        throw new Error('Utilisateur non authentifié');
+      }
+      const success = await eventRepository.delete(id, createdBy);
+      if (!success) {
+        throw new Error('Événement non trouvé ou non autorisé');
+      }
+      return success;
+    } catch (error) {
+      console.error('Erreur dans EventService.deleteEvent:', error);
+      throw error;
+    }
   }
 }
 

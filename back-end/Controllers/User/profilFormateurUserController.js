@@ -171,6 +171,40 @@ class ProfilFormateurUserController {
               res.status(500).json({ error: error.message });
             }
           }
+
+          async getEventsByUser(req, res) {
+  try {
+    const userData = req.user;
+    if (!userData) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const events = await this.service.getEventsByUser(userData);
+    res.status(200).json(events);
+  } catch (error) {
+    console.error('Controller Error - getEventsByUser:', error);
+    res.status(500).json({ 
+      error: error.message || 'Internal server error while fetching user events' 
+    });
+  }
+}
+         // Dans votre contrôleur
+/*async getEvents(req, res) {
+        try {
+            const created_by = req.user.nom_complet; // Utilisez l'utilisateur connecté
+            const events = await eventService.getEvents(created_by);
+            
+            res.json({
+                success: true,
+                data: events
+            });
+        } catch (error) {
+            console.error('Controller Error - getEvents:', error);
+            res.status(500).json({ 
+                success: false,
+                message: 'Erreur lors de la récupération des événements'
+            });
+        }
+    }*/
         
           async createEvent(req, res) {
             try {
@@ -218,8 +252,7 @@ async deleteEvent(req, res) {
     res.status(500).json({ error: error.message });
   }
 
-}
-        
+}        
     async sendModificationRequest(req, res) {
       try {
           const requestData = {

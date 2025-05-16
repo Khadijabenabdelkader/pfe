@@ -69,7 +69,7 @@ const Profile = () => {
             <h3 className='dark:border-strokedark dark:text-white underline text-gray-800'>Téléphone</h3>
             <p className="dark:border-strokedark dark:text-white mt-2 text-lg text-gray-600 dark:text-gray-400">{user.telephone}</p>
             <h3 className='dark:border-strokedark dark:text-white underline text-gray-800'>description: </h3>
-            <p className="dark:border-strokedark dark:text-white mt-2 text-lg text-gray-600 dark:text-gray-400">{user.description}</p>
+            <p className="dark:border-strokedark dark:text-white mt-2 text-lg text-gray-600 dark:text-gray-400">{user.poste}</p>
             
       </div>
       </div>

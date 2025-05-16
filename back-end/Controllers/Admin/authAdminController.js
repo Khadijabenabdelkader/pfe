@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const db = require('../../connect');
+
 const login = (req, res) => {
   const { nom_admin, password } = req.body;
 
@@ -77,8 +78,8 @@ module.exports = { login, logout };
 
 
 
-/*
 
+{/*}
 
 const authAdminService = require('../../services/admin/authAdminServices');
 
@@ -121,5 +122,4 @@ class AuthAdminController {
   }
 }
 
-module.exports = new AuthAdminController();
-*/
+module.exports = new AuthAdminController();*/}

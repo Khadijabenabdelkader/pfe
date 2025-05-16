@@ -114,7 +114,7 @@ class CatalogueRepository {
             lastNumber = nextNumber;
 
             const formattedNumber = String(nextNumber).padStart(3, '0');
-            const code = '${existingPrefix}${formattedNumber}';
+            const code = `${existingPrefix}${formattedNumber}`;
 
             // Créer une entrée dans la table "formation"
             const formationResult = await new Promise((resolve, reject) => {
@@ -248,7 +248,7 @@ class CatalogueRepository {
         if (result.affectedRows === 0) {
           return reject(new Error('No theme found with the given ID'));
         }
-        resolve('{ message: Thème ${id_theme} supprimé du domaine ${id_domaine} }');
+        resolve({ message: `Thème ${id_theme} supprimé du domaine ${id_domaine}` });
       });
     });
   }
@@ -268,8 +268,8 @@ class CatalogueRepository {
           return reject(new Error("Thème non trouvé"));
         }
 
-        const themeName = themeResults[0].theme;
-
+        const themeName = themeResults.theme;
+        console.log('themeName',themeName);
         try {
           // 2. Traitement des formateurs à supprimer
           for (const id_formateur of formateursToRemove) {
@@ -284,7 +284,7 @@ class CatalogueRepository {
                   }
 
                   if (formateurResults && formateurResults.length > 0) {
-                    const formateur = formateurResults[0];
+                    const formateur = formateurResults;
                     let themes = {};
 
                     try {
@@ -337,7 +337,7 @@ class CatalogueRepository {
                   }
 
                   if (formateurResults && formateurResults.length > 0) {
-                    const formateur = formateurResults[0];
+                    const formateur = formateurResults;
                     let themes = {};
 
                     try {
@@ -350,6 +350,7 @@ class CatalogueRepository {
                     }
 
                     themes[themeName] = rang;
+                    console.log('domaine,themeName à inserer:',JSON.stringify(themes), domaines.join(','));
                     const domaines = Object.keys(themes);
 
                     db.query(

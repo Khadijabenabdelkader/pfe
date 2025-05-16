@@ -17,21 +17,15 @@ const db = require('../../connect');
 const demandeFormationService = require('../../services/admin/demandeFormationPersonalisee'); // Déclaration UNIQUE
 
 class DemandeFormationController {
-  async DemanderFormation(req, res) {
+ async getAll(req, res) {
     try {
-      const query = 'SELECT * FROM demande_de_formation_personnalisee';
-      db.query(query, (err, results) => {
-        if (err) {
-          console.error('Erreur lors de la récupération des données: ', err);
-          return res.status(500).json({ error: 'Erreur serveur' });
-        }
-        res.json(results);
-      });
+      const demandes = await demandeFormationService.getAllDemandesWithParticipants();
+      res.json(demandes);
     } catch (error) {
-      console.error('Erreur dans DemandeFormationController:', error);
+      console.error('Erreur contrôleur:', error);
       res.status(500).json({ 
-        error: error.message,
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        error: 'Erreur lors de la récupération des demandes',
+        details: error.message 
       });
     }
   }

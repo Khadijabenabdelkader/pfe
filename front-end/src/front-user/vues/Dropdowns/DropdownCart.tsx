@@ -116,9 +116,9 @@ const DropdownCart = ({ dropdownOpen }: { dropdownOpen: boolean }) => {
       tel_participant: user.telephone,
     };
 
-    const updatedCart = {
+     const updatedCart = {
       ...cart,
-      action: "commander",
+      action: "commander" as "commander",
       participant: participantData,
       cartId: cart.cartId || Date.now(),
     };
@@ -143,9 +143,9 @@ const DropdownCart = ({ dropdownOpen }: { dropdownOpen: boolean }) => {
       tel_participant: user.telephone,
     };
 
-    const updatedCart = {
+      const updatedCart = {
       ...cart,
-      action: "demander_devis",
+      action: "demander_devis" as "demander_devis",
       participant: participantData,
       cartId: cart.cartId || Date.now(),
     };

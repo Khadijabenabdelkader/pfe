@@ -37,7 +37,7 @@ const authRoutes = require('./Routes/Admin/authRoutes');
 const accesRoutes = require('./Routes/Admin/accesRoutes');
 const calendrierRoutes = require('./Routes/Admin/calendrierEventRoute');
 const clientRoutes = require('./Routes/Admin/clientRoutes');
-//const chartRoutes = require('./Routes/Admin/chartRoutes');
+const chartRoutes = require('./Routes/Admin/chartRoutes');
 const demanderFormationRoutes = require('./Routes/Admin/DemanderFormationRoute');
 const calendrierFormationRoutes = require('./Routes/Admin/calendrierFormationRoutes');
 const feuillePresenceRoutes = require('./Routes/Admin/FeuillePresenceRoutes');
@@ -68,13 +68,10 @@ app.use('/apiAdmin/formations', formationRoutes);
 app.use('/apiAdmin/admin', adminRoutes);
 app.use('/apiAdmin/auth', authRoutes);
 app.use('',accesRoutes);
-//app.use('/apiAdmin/calendrierEvent', calendrierRoutes);
-app.use('/api/calendrier', calendrierRoutes);
-
+app.use('/apiAdmin/calendrierEvent', calendrierRoutes);
 app.use('/apiAdmin',clientRoutes);
 app.use('/api/commandes', commandeRouter);
-
-//app.use('/apiAdmin', chartRoutes);
+app.use('/apiAdmin', chartRoutes);
 app.use('/apiAdmin/demanderFormation',demanderFormationRoutes);
 app.use('/apiAdmin',calendrierFormationRoutes);
 app.use('/apiAdmin', feuillePresenceRoutes);
@@ -82,6 +79,7 @@ app.use('/apiAdmin/avis',avisP);
 app.use('/apiAdmin/avis',avisF);
 app.use('/apiAdmin',calForm);
 app.use('/apiAdmin',domaineAdminRoutes);
+
 // Routes utilisateur
 app.use('/apiUser/formateurs', formateurRoute);
 app.use('/apiUser/formations',catalogueRoute);

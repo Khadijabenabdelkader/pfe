@@ -9,44 +9,60 @@ const updateSessions = async (sessions) => {
   );
   return Promise.all(updatePromises);
 };
-
-const getDomainesWithSessions = async () => {
-  const query = `
-    SELECT 
-      f.id_formation,
-      d.id_domaine,
-      d.domaine,
-      t.id_theme,
-      t.theme,
-      t.code,
-      s.createdAt,
-      s.id_session
-    FROM formation f
-    JOIN domaine d ON f.id_domaine = d.id_domaine
-    JOIN session s ON f.id_formation = s.id_formation
-    JOIN theme t ON t.id_theme = s.id_theme;
-  `;
-  return db.query(query);
+const getDomainesWithSessions = () => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        f.id_formation,
+        d.id_domaine,
+        d.domaine,
+        t.id_theme,
+        t.theme,
+        t.code,
+        s.createdAt,
+        s.id_session
+      FROM formations f
+      JOIN domaine d ON f.id_domaine = d.id_domaine
+      JOIN session s ON f.id_formation = s.id_formation
+      JOIN theme t ON t.id_theme = s.id_theme;
+    `;
+    
+    db.query(query, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
 };
 
-const getCalendarSessions = async () => {
-  const query = `
-    SELECT 
-      f.id_formation,
-      d.id_domaine,
-      d.domaine,
-      t.id_theme,
-      t.theme,
-      t.code,
-      s.createdAt,
-      s.id_session, s.date_debut, s.date_fin, s.duree
-    FROM formation f
-    JOIN domaine d ON f.id_domaine = d.id_domaine
-    JOIN session s ON f.id_formation = s.id_formation
-    JOIN theme t ON t.id_theme = s.id_theme
-    WHERE s.duree IS NOT NULL AND s.date_fin IS NOT NULL AND s.date_debut IS NOT NULL;
-  `;
-  return db.query(query);
+const getCalendarSessions = () => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT 
+        f.id_formation,
+        d.id_domaine,
+        d.domaine,
+        t.id_theme,
+        t.theme,
+        t.code,
+        s.createdAt,
+        s.id_session, 
+        s.date_debut, 
+        s.date_fin, 
+        s.duree
+      FROM formations f
+      JOIN domaine d ON f.id_domaine = d.id_domaine
+      JOIN session s ON f.id_formation = s.id_formation
+      JOIN theme t ON t.id_theme = s.id_theme
+      WHERE s.duree IS NOT NULL 
+        AND s.date_fin IS NOT NULL 
+        AND s.date_debut IS NOT NULL;
+    `;
+    
+    db.query(query, (err, results) => {
+      if (err) return reject(err);
+      resolve(results);
+    });
+  });
 };
 
 const deleteSession = async (id) => {

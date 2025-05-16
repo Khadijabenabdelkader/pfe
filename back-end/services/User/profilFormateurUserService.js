@@ -147,6 +147,18 @@ class ProfilFormateurUserService {
               throw new Error('Failed to fetch events');
             }
           }
+          
+         async getEventsByUser(userData) {
+  try {
+    if (!userData?.nom_complet) {
+      throw new Error('User information incomplete');
+    }
+    return await this.repository.getEventsByUser(userData.nom_complet);
+  } catch (error) {
+    console.error('Service Error - getEventsByUser:', error);
+    throw new Error(error.message || 'Failed to fetch user events');
+  }
+}
         
           async createEvent(eventData) {
             try {

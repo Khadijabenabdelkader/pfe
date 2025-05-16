@@ -3,43 +3,49 @@ const Event = require('../../models/admin/evenement');
 
 class EventRepository {
 
-  async getAllEvents() {
+async getAll() {
     return new Promise((resolve, reject) => {
-      db.query('SELECT * FROM event', (err, results) => {
+      db.query('SELECT * FROM calendrier', (err, results) => {
         if (err) {
-          console.error('Repository Error - getAllEvents:', err);
-          return reject(new Error('Database error while fetching events'));
+          console.error('Erreur dans EventRepository.getAll:', err);
+          return reject(err);
         }
-        resolve(results);
+        resolve(results.map(row => new Event({
+          id: row.id,
+          title: row.title,
+          date: row.date,
+          created_by: row.created_by
+        })));
       });
     });
   }
 
-  async createEvent(event, date, created_by) {
+  async create(title, date, createdBy) {
     return new Promise((resolve, reject) => {
-      const query = 'INSERT INTO event (event, date, created_by) VALUES (?, ?, ?)';
-      
-      db.query(query, [event, date, created_by], (err, result) => {
+      const query = 'INSERT INTO calendrier (title, date, created_by) VALUES (?, ?, ?)';
+      db.query(query, [title, date, createdBy], (err, result) => {
         if (err) {
-          console.error('Repository Error - createEvent:', err);
-          return reject(new Error('Database error while creating event'));
+          console.error('Erreur dans EventRepository.create:', err);
+          return reject(err);
         }
-        
-        resolve({
+        resolve(new Event({
           id: result.insertId,
-          event,
+          title,
           date,
-          created_by
-        });
+          created_by: createdBy
+        }));
       });
     });
   }
 
-  async deleteEvent(id_event, created_by) {
+  async delete(id, createdBy) {
     return new Promise((resolve, reject) => {
-      const query = 'DELETE FROM event WHERE id_event = ? AND created_by = ?';
-      db.query(query, [id_event, created_by], (err, result) => {
-        if (err) return reject(err);
+      const query = 'DELETE FROM calendrier WHERE id = ? AND created_by = ?';
+      db.query(query, [id, createdBy], (err, result) => {
+        if (err) {
+          console.error('Erreur dans EventRepository.delete:', err);
+          return reject(err);
+        }
         resolve(result.affectedRows > 0);
       });
     });

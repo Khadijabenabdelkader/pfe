@@ -79,6 +79,9 @@ const authenticateToken = (req, res, next) => {
 };
   router.get('/api/calendrier', authenticateToken,  (req, res) => controller.getEvents(req, res));
   
+router.get('/api/calendrierByUser', authenticateToken, (req, res) => {
+  controller.getEventsByUser(req, res);
+});
   router.post('/api/calendrier', (req, res) => controller.createEvent(req, res));
   
   router.delete('/api/calendrier/:id_event', authenticateToken, (req, res) => controller.deleteEvent(req, res));

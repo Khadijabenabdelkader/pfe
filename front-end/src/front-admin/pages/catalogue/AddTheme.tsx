@@ -118,35 +118,41 @@ const AddTheme: React.FC<AddFormationProps> = ({
   };
 
   const onSubmit = async (data: DomaineData) => {
-    try {
-      const finalData = {
-        ...data,
-        themes: data.themes.map((theme, index) => ({
-          ...theme,
-          formateurs: selectedFormateurs[`theme_${index}`] || []
-        }))
-      };
+  try {
+    const requestData = {
+      domaineName: data.domaineName,
+      abbreviation: "", // Vous pouvez ajouter ce champ si nécessaire
+      themes: data.themes.map((theme, index) => ({
+        name: theme.name,
+        formateurs: selectedFormateurs[`theme_${index}`] || []
+      }))
+    };
 
-      console.log("Données envoyées:", finalData);
-
-      const response = await axios.post(
-        `${import.meta.env.VITE_APP_API_URL}/apiAdmin/catalogue/addThemesToDomain`,
-        finalData
-      );
-
-      if (response.status !== 201 && response.status !== 200) {
-        throw new Error("Erreur lors de l'ajout des thèmes");
+    const response = await axios.post(
+      `${import.meta.env.VITE_APP_API_URL}/apiAdmin/catalogue/addThemesToDomain`,
+      requestData,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       }
+    );
 
-      onFormationAdded();
-      reset();
-      setSelectedFormateurs({});
-      alert("Thèmes ajoutés avec succès au domaine !");
-    } catch (error) {
-      console.error("Erreur lors de l'ajout :", error);
-      alert("Une erreur est survenue lors de l'ajout des thèmes");
+    if (response.status !== 201 && response.status !== 200) {
+      throw new Error("Erreur lors de l'ajout des thèmes");
     }
-  };
+
+    onFormationAdded();
+    reset();
+    setSelectedFormateurs({});
+    alert("Thèmes ajoutés avec succès au domaine !");
+    onClose();
+  } catch (error) {
+    console.error("Erreur lors de l'ajout :", error);
+    alert(`Erreur: ${axios.isAxiosError(error) ? error.response?.data?.message || error.message : "Une erreur est survenue"}`);
+  }
+};
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 p-4">

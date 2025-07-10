@@ -51,7 +51,7 @@ ORDER BY
     p.nom_complet
 FROM feuille_presence fp
 LEFT JOIN feuille_presence_participants fpp ON fp.id_presence = fpp.id_presence
-LEFT JOIN session_formation s ON fpp.id_session = s.id_session
+LEFT JOIN session s ON fpp.id_session = s.id_session
 LEFT JOIN participants p ON fpp.id_participant = p.id_participant
 WHERE fp.id_presence = ?;
       `;

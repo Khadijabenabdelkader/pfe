@@ -45,9 +45,10 @@ const Footer: React.FC = () => {
   };
   
   const Links = [
-    { name: "Présentation", link: "/presentation" },
-    { name: "Formations", link: "/formations" },
-    { name: "Formateurs", link: "/formateurs" },
+    { name: "Catalogue", link: "/catalogue" },
+    { name: "Calendrier", link: "/calendrier" },
+    { name: "Nos Références", link: "/references" },
+    { name: "Demande De Formation", link: "/DemandeFormation" },
     { name: "Avis", link: "/avis" },
   ];
 

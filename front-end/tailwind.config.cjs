@@ -17,7 +17,7 @@ module.exports = {
     },
     extend: {
       blur: {
-        sm: '4px', // Remplacer 4px par 2px
+        sm: '4px', 
       },
       colors: {
         current: 'currentColor',

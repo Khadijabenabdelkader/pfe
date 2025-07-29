@@ -174,7 +174,7 @@ const SidebarAdmin = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                       fill=""
                     />
                   </svg>
-                  Demander de formation
+                  Les demandes 
                 </NavLink>
               </li>
               {/* <!-- Menu Item Calendar --> */}

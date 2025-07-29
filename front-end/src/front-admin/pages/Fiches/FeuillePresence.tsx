@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Document, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, HeadingLevel, AlignmentType } from "docx";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
+import { FiEdit2, FiTrash2, FiPlus, FiSave, FiPrinter, FiDownload, FiCalendar, FiClock, FiUser, FiBriefcase, FiHome, FiMail, FiPhone, FiCheckSquare } from 'react-icons/fi';
 
 interface Theme {
   id_session: number;
@@ -658,370 +659,427 @@ const addParticipant = () => {
     }));
   };
 
-  
-  return (
-    <div id="feuille-presence" className="container mx-auto p-4 font-sans">
-      <h1 className="text-2xl font-bold text-center mb-6">Feuille de Présence</h1>
-      
-      {/* Section Crédit d'impôt et Droits de tirage */}
-      <div className="mb-6 p-4 border rounded">
-        <div className="flex items-center mb-4">
-          <input 
-            type="checkbox" 
-            id="creditImpôt" 
-            name="creditImpôt"
-            checked={formData.creditImpôt} 
-            onChange={handleCheckboxChange} 
-            className="mr-2"
-          />
-          <label htmlFor="creditImpôt" className="font-bold">Crédit d'impôt</label>
+   return (
+    <div id="feuille-presence" className="container mx-auto p-4 font-sans bg-gray-50 min-h-screen">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 text-center mb-2">Feuille de Présence</h1>
+          <p className="text-gray-600 text-center">Gestion des présences pour les sessions de formation</p>
         </div>
-        
-        <div className="mb-4">
-          <label className="font-bold">Droits de tirage :</label>
-          <div className="flex mt-2">
-            <div className="flex items-center mr-4">
-              <input 
-                type="radio" 
-                id="droitIndividuel" 
-                name="droitTirage" 
-                value="individuel" 
-                checked={formData.droitTirage === 'individuel'} 
-                onChange={handleChange} 
-                className="mr-2"
-              />
-              <label htmlFor="droitIndividuel">Individuel</label>
-            </div>
-            <div className="flex items-center">
-              <input 
-                type="radio" 
-                id="droitCollectif" 
-                name="droitTirage" 
-                value="collectif" 
-                checked={formData.droitTirage === 'collectif'} 
-                onChange={handleChange} 
-                className="mr-2"
-              />
-              <label htmlFor="droitCollectif">Collectif</label>
-            </div>
-          </div>
-        </div>
-        
-        <div className="mb-4">
-          <label className="font-bold">Mode de formation :</label>
-          <div className="flex mt-2">
-            <div className="flex items-center mr-4">
-              <input 
-                type="radio" 
-                id="intraEntreprise" 
-                name="modeFormation" 
-                value="intra-entreprise" 
-                checked={formData.modeFormation === 'intra-entreprise'} 
-                onChange={handleChange} 
-                className="mr-2"
-              />
-              <label htmlFor="intraEntreprise">Intra-entreprise</label>
-            </div>
-            <div className="flex items-center">
-              <input 
-                type="radio" 
-                id="interEntreprise" 
-                name="modeFormation" 
-                value="inter-entreprise" 
-                checked={formData.modeFormation === 'inter-entreprise'} 
-                onChange={handleChange} 
-                className="mr-2"
-              />
-              <label htmlFor="interEntreprise">Inter-entreprise</label>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Section Thème et Informations */}
-      <div className="mb-6 p-4 border rounded">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <select 
-  name="themeFormation"
-  value={formData.themeFormation || ''} 
-  onChange={handleThemeChange} 
-  className="w-full p-2 border rounded"
->
-  <option value="">Sélectionner un thème</option>
-  {filteredThemes.map(theme => (
-    <option key={theme.id_session} value={theme.id_session}>
-      {theme.theme_nom} (Formateur: {theme.formateur_nom || 'Non spécifié'})
-    </option>
-  ))}
-</select>
-          
-          <div>
-            <label className="block font-bold mb-1">Lieu de déroulement :</label>
-            <input 
-              type="text" 
-              name="lieuDeroulement"
-              value={formData.lieuDeroulement} 
-              onChange={handleChange} 
-              className="w-full p-2 border rounded"
-            />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block font-bold mb-1">Période de formation :</label>
-            <div className="flex items-center">
-              <span className="mr-2">Du :</span>
-              <input 
-  type="date" 
-  name="periodeDu"
-  value={formatDateForInput(formData.periodeDu || '')} 
-  onChange={handleChange} 
-  className="p-2 border rounded"
-/>
-              <span className="mx-2">Au :</span>
-              <input 
-  type="date" 
-  name="periodeAu"
-  value={formatDateForInput(formData.periodeAu || '')} 
-  onChange={handleChange} 
-  className="p-2 border rounded"
-/>
-            </div>
-          </div>
-          
-          <div>
-            <label className="block font-bold mb-1">Durée :</label>
-            <input 
-              type="text" 
-              name="duree"
-              value={formData.duree} 
-              onChange={handleChange} 
-              className="w-full p-2 border rounded"
-            />
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block font-bold mb-1">Horaires :</label>
-            <div className="flex items-center">
-              <span className="mr-2">De :</span>
-              <input 
-                type="time" 
-                name="horaireDe"
-                value={formData.horaireDe} 
-                onChange={handleChange} 
-                className="p-2 border rounded"
-              />
-              <span className="mx-2">À :</span>
-              <input 
-                type="time" 
-                name="horaireA"
-                value={formData.horaireA} 
-                onChange={handleChange} 
-                className="p-2 border rounded"
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label className="block font-bold mb-1">Pause :</label>
-            <div className="flex items-center">
-              <span className="mr-2">De :</span>
-              <input 
-                type="time" 
-                name="pauseDe"
-                value={formData.pauseDe} 
-                onChange={handleChange} 
-                className="p-2 border rounded"
-              />
-              <span className="mx-2">À :</span>
-              <input 
-                type="time" 
-                name="pauseA"
-                value={formData.pauseA} 
-                onChange={handleChange} 
-                className="p-2 border rounded"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      
-{/* Participants */}
-<div className="mb-8">
-  <div className="flex justify-between items-center mb-4">
-    <h2 className="text-xl font-bold">Liste des Participants</h2>
-    <div className="flex space-x-2">
-      <button 
-        onClick={() => toggleParticipantColumn('CIN')} 
-        className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded text-sm"
-      >
-        {showParticipantColumns.CIN ? 'Masquer CIN' : 'Afficher CIN'}
-      </button>
-      
-    </div>
-  </div>
-  
-  <div className="overflow-x-auto rounded-lg shadow">
-    <table className="min-w-full bg-white border">
-      <thead>
-        <tr className="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-          <th className="py-3 px-3 text-left border">N°</th>
-          <th className="py-3 px-8 text-left border">Nom et Prénom</th>
-          {showParticipantColumns.CIN && <th className="py-3 px-8 text-left border">N° CIN</th>}
-          {showParticipantColumns.mail && <th className="py-3 px-8 text-left border">Email</th>}
-          {selectedTheme && renderEmargementColumns()}
-          <th className="py-3 px-6 text-center border">Actions</th>
-        </tr>
-      </thead>
-      <tbody className="text-gray-600 text-sm font-light">
-        {participants.map((participant, index) => (
-          <tr 
-            key={participant.id}
-            className="border-b hover:bg-gray-100 transition duration-200"
-          >
-            <td className="py-3 px-3 border">{index + 1}</td>
-            <td className="py-3 px-2 border">
-              <input 
-                type="text" 
-                value={participant.nomPrenom} 
-                onChange={(e) => {
-                  const updatedParticipants = [...participants];
-                  updatedParticipants[index].nomPrenom = e.target.value;
-                  setParticipants(updatedParticipants);
-                }} 
-                className="w-full p-2 border rounded-md"
-              />
-            </td>
 
-            {showParticipantColumns.CIN && (
-              <td className="py-3 px-2 border">
+        {/* Configuration Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          {/* Left Column - Options */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <FiCheckSquare className="mr-2 text-teal-500" />
+              Options
+            </h2>
+            
+            <div className="space-y-4">
+              <div className="flex items-center">
+                <input 
+                  type="checkbox" 
+                  id="creditImpôt" 
+                  name="creditImpôt"
+                  checked={formData.creditImpôt} 
+                  onChange={handleCheckboxChange} 
+                  className="h-5 w-5 text-teal-500 rounded border-gray-300 focus:ring-teal-500"
+                />
+                <label htmlFor="creditImpôt" className="ml-2 block text-gray-700">Crédit d'impôt</label>
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Droits de tirage</label>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <input 
+                      type="radio" 
+                      id="droitIndividuel" 
+                      name="droitTirage" 
+                      value="individuel" 
+                      checked={formData.droitTirage === 'individuel'} 
+                      onChange={handleChange} 
+                      className="h-4 w-4 text-teal-500 border-gray-300 focus:ring-teal-500"
+                    />
+                    <label htmlFor="droitIndividuel" className="ml-2 text-gray-700">Individuel</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input 
+                      type="radio" 
+                      id="droitCollectif" 
+                      name="droitTirage" 
+                      value="collectif" 
+                      checked={formData.droitTirage === 'collectif'} 
+                      onChange={handleChange} 
+                      className="h-4 w-4 text-teal-500 border-gray-300 focus:ring-teal-500"
+                    />
+                    <label htmlFor="droitCollectif" className="ml-2 text-gray-700">Collectif</label>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">Mode de formation</label>
+                <div className="space-y-2">
+                  <div className="flex items-center">
+                    <input 
+                      type="radio" 
+                      id="intraEntreprise" 
+                      name="modeFormation" 
+                      value="intra-entreprise" 
+                      checked={formData.modeFormation === 'intra-entreprise'} 
+                      onChange={handleChange} 
+                      className="h-4 w-4 text-teal-500 border-gray-300 focus:ring-teal-500"
+                    />
+                    <label htmlFor="intraEntreprise" className="ml-2 text-gray-700">Intra-entreprise</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input 
+                      type="radio" 
+                      id="interEntreprise" 
+                      name="modeFormation" 
+                      value="inter-entreprise" 
+                      checked={formData.modeFormation === 'inter-entreprise'} 
+                      onChange={handleChange} 
+                      className="h-4 w-4 text-teal-500 border-gray-300 focus:ring-teal-500"
+                    />
+                    <label htmlFor="interEntreprise" className="ml-2 text-gray-700">Inter-entreprise</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Middle Column - Session Info */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <FiCalendar className="mr-2 text-teal-500" />
+              Session
+            </h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Thème de formation</label>
+                <select 
+                  name="themeFormation"
+                  value={formData.themeFormation || ''} 
+                  onChange={handleThemeChange} 
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                >
+                  <option value="">Sélectionner un thème</option>
+                  {filteredThemes.map(theme => (
+                    <option key={theme.id_session} value={theme.id_session}>
+                      {theme.theme_nom} (Formateur: {theme.formateur_nom || 'Non spécifié'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Lieu de déroulement</label>
+                <input 
+                  type="text" 
+                  name="lieuDeroulement"
+                  value={formData.lieuDeroulement} 
+                  onChange={handleChange} 
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-700 font-medium mb-1">Date début</label>
+                  <input 
+                    type="date" 
+                    name="periodeDu"
+                    value={formatDateForInput(formData.periodeDu || '')} 
+                    onChange={handleChange} 
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 font-medium mb-1">Date fin</label>
+                  <input 
+                    type="date" 
+                    name="periodeAu"
+                    value={formatDateForInput(formData.periodeAu || '')} 
+                    onChange={handleChange} 
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Schedule */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <FiClock className="mr-2 text-teal-500" />
+              Horaires
+            </h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Durée (heures)</label>
                 <input 
                   type="number" 
-                  value={participant.CIN} 
-                  onChange={(e) => {
-                    const updatedParticipants = [...participants];
-                    updatedParticipants[index].CIN = e.target.value;
-                    setParticipants(updatedParticipants);
-                  }} 
-                  className="w-full p-2 border rounded-md"
+                  name="duree"
+                  value={formData.duree} 
+                  onChange={handleChange} 
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
                 />
-              </td>
-            )}
-            {showParticipantColumns.mail && (
-              <td className="py-3 px-2 border">
-                <input 
-                  type="email" 
-                  value={participant.mail} 
-                  onChange={(e) => {
-                    const updatedParticipants = [...participants];
-                    updatedParticipants[index].mail = e.target.value;
-                    setParticipants(updatedParticipants);
-                  }} 
-                  className="w-full p-2 border rounded-md"
-                />
-              </td>
-            )}
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Horaires de formation</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input 
+                    type="time" 
+                    name="horaireDe"
+                    value={formData.horaireDe} 
+                    onChange={handleChange} 
+                    className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                  <input 
+                    type="time" 
+                    name="horaireA"
+                    value={formData.horaireA} 
+                    onChange={handleChange} 
+                    className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Pause</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <input 
+                    type="time" 
+                    name="pauseDe"
+                    value={formData.pauseDe} 
+                    onChange={handleChange} 
+                    className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                  <input 
+                    type="time" 
+                    name="pauseA"
+                    value={formData.pauseA} 
+                    onChange={handleChange} 
+                    className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Participants Section */}
+        <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+            <h2 className="text-xl font-semibold text-gray-800 flex items-center mb-4 md:mb-0">
+              <FiUser className="mr-2 text-teal-500" />
+              Liste des Participants
+            </h2>
             
-            {selectedTheme && renderEmargementCells(participant)}
-
-            <td className="py-3 px-6 text-center border">
-            <button
-                  onClick={() => removeParticipant(participant.id)}
-                  className="text-red-600 hover:text-red-900 transition-colors"
-                  title="Supprimer"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-
-  <div className="flex justify-end mt-4">
-    <button 
-      onClick={addParticipant} 
-      className="flex items-center px-5 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg shadow"
-    >
-      + Ajouter Participant
-    </button>
-  </div>
-</div>
-
-      {/* Formateurs */}
-      <div className="mb-6 p-4 border rounded">
-        <h2 className="font-bold mb-4">Formateur</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block mb-1">Nom et prénom</label>
-            <input 
-              type="text" 
-              name="nomPrenom"
-              value={formData.formateur.nomPrenom} 
-              onChange={handleFormateurChange} 
-              className="w-full p-2 border rounded"
-            />
+            <div className="flex space-x-2">
+              <button 
+                onClick={() => toggleParticipantColumn('CIN')} 
+                className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center ${showParticipantColumns.CIN ? 'bg-teal-100 text-teal-800' : 'bg-gray-100 text-gray-700'}`}
+              >
+                {showParticipantColumns.CIN ? 'Masquer CIN' : 'Afficher CIN'}
+              </button>
+              
+              <button 
+                onClick={addParticipant} 
+                className="px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium flex items-center"
+              >
+                <FiPlus className="mr-1" />
+                Ajouter
+              </button>
+            </div>
           </div>
           
-          <div>
-            <label className="block mb-1">CIN N°</label>
-            <input 
-              type="text" 
-              name="cin"
-              value={formData.formateur.cin} 
-              onChange={handleFormateurChange} 
-              className="w-full p-2 border rounded"
-            />
+          <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N°</th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom et Prénom</th>
+                  {showParticipantColumns.CIN && (
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">N° CIN</th>
+                  )}
+                  {showParticipantColumns.mail && (
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  )}
+                  {selectedTheme && renderEmargementColumns()}
+                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {participants.map((participant, index) => (
+                  <tr key={participant.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{index + 1}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input 
+                        type="text" 
+                        value={participant.nomPrenom} 
+                        onChange={(e) => {
+                          const updatedParticipants = [...participants];
+                          updatedParticipants[index].nomPrenom = e.target.value;
+                          setParticipants(updatedParticipants);
+                        }} 
+                        className="w-full p-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                      />
+                    </td>
+
+                    {showParticipantColumns.CIN && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input 
+                          type="text" 
+                          value={participant.CIN} 
+                          onChange={(e) => {
+                            const updatedParticipants = [...participants];
+                            updatedParticipants[index].CIN = e.target.value;
+                            setParticipants(updatedParticipants);
+                          }} 
+                          className="w-full p-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                        />
+                      </td>
+                    )}
+                    
+                    {showParticipantColumns.mail && (
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <input 
+                          type="email" 
+                          value={participant.mail} 
+                          onChange={(e) => {
+                            const updatedParticipants = [...participants];
+                            updatedParticipants[index].mail = e.target.value;
+                            setParticipants(updatedParticipants);
+                          }} 
+                          className="w-full p-2 border border-gray-300 rounded-md focus:ring-teal-500 focus:border-teal-500"
+                        />
+                      </td>
+                    )}
+                    
+                    {selectedTheme && renderEmargementCells(participant)}
+
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={() => removeParticipant(participant.id)}
+                        className="text-red-600 hover:text-red-900 transition-colors p-1 rounded-full hover:bg-red-50"
+                        title="Supprimer"
+                      >
+                        <FiTrash2 className="h-5 w-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-      </div>
-      
-      
-      {/* Entreprise bénéficiaire */}
-      <div className="mb-6 p-4 border rounded">
-        <h2 className="font-bold mb-4">Entreprise bénéficiaire :</h2>
-        <input 
-          type="text" 
-          name="entrepriseBeneficiaire"
-          value={formData.entrepriseBeneficiaire} 
-          onChange={handleChange} 
-          className="w-full p-2 border rounded mb-4"
-        />
-        
-        <div className="mb-4">
-          <p className="text-sm mb-2">
-            <strong>Important :</strong> Si le séminaire est co-organisé avec d'autres opérateurs de formation, indiquer les ci-dessous :
-          </p>
-          <textarea 
-            name="coOrganisateurs"
-            value={formData.coOrganisateurs} 
-            onChange={handleChange} 
-            className="w-full p-2 border rounded"
-            rows="3"
-          />
-        </div>
-        
-        {/*<div className="mt-8 pt-4 border-t">
-          <p className="font-bold mb-2">Signature et Cachet de l'organisme de formation / Entreprise</p>
-          <div className="h-20 border-2 border-dashed"></div>
-        </div>*/}
-      </div>
 
-      {/* Submit Button */}
-      <div className="flex justify-center">
-        <button 
-          onClick={handleFormSubmit} 
-          className="px-6 py-3 bg-teal-500 text-white rounded hover:bg-teal-300"
-        >
-          Enregistrer la feuille de présence
-        </button>
+        {/* Formateur et Entreprise Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          {/* Formateur */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <FiBriefcase className="mr-2 text-teal-500" />
+              Formateur
+            </h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Nom et prénom</label>
+                <input 
+                  type="text" 
+                  name="nomPrenom"
+                  value={formData.formateur.nomPrenom} 
+                  onChange={handleFormateurChange} 
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">CIN N°</label>
+                <input 
+                  type="text" 
+                  name="cin"
+                  value={formData.formateur.cin} 
+                  onChange={handleFormateurChange} 
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Entreprise bénéficiaire */}
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <FiHome className="mr-2 text-teal-500" />
+              Entreprise bénéficiaire
+            </h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Nom de l'entreprise</label>
+                <input 
+                  type="text" 
+                  name="entrepriseBeneficiaire"
+                  value={formData.entrepriseBeneficiaire} 
+                  onChange={handleChange} 
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-gray-700 font-medium mb-1">Co-organisateurs</label>
+                <p className="text-sm text-gray-500 mb-2">
+                  Si le séminaire est co-organisé avec d'autres opérateurs de formation, indiquez-les ci-dessous :
+                </p>
+                <textarea 
+                  name="coOrganisateurs"
+                  value={formData.coOrganisateurs} 
+                  onChange={handleChange} 
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                  rows="3"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <button 
+              onClick={handleFormSubmit} 
+              className="px-6 py-3 bg-teal-500 hover:bg-teal-600 text-white rounded-lg font-medium flex items-center justify-center transition-colors"
+            >
+              <FiSave className="mr-2" />
+              Enregistrer
+            </button>
+            
+            <button 
+              onClick={generatePDF} 
+              className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium flex items-center justify-center transition-colors"
+            >
+              <FiDownload className="mr-2" />
+              Exporter PDF
+            </button>
+            
+            <button 
+              onClick={generateWordDocument} 
+              className="px-6 py-3 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium flex items-center justify-center transition-colors"
+            >
+              <FiPrinter className="mr-2" />
+              Exporter Word
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

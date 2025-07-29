@@ -13,10 +13,11 @@ import ProfilParticipant from "./vues/ProfilParticipant/ProfilParticipant.tsx";
 import AvisParticipant from "./vues/Navbar/AvisParticipant.tsx";
 import AvisFormateur from "./vues/Navbar/AvisFormateur.tsx";
 import DemanderFormation from "./vues/Navbar/DemanderFormation.tsx";
-import Contact from "./vues/Footer.tsx";
+import Contact from "./vues/Navbar/ContactForm.tsx";
 import { AuthProvider } from "./vues/Context/AuthProviderUser";
 import ResetPasswordPage from "./vues/ResetPasswordPage.tsx";
 import References from "./vues/Navbar/references.tsx";
+import SoumettreCandidature from "./vues/Navbar/SoumettreCandidature.tsx";
 const AppUser = () => {
   
   return (
@@ -48,6 +49,8 @@ const AppUser = () => {
             <Route path="/Contact" element={<Contact />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/references" element={<References />} />
+            <Route path="/formateur-candidature" element={<SoumettreCandidature />} />
+
           </Routes>
           <hr />
           <Footer />

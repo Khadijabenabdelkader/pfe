@@ -16,55 +16,47 @@ const SignIn = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
   
-    const { nom_admin, password } = formData;
-    if (!nom_admin || !password ) {
-      setError('Tous les champs sont requis');
-      return;
-    }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
   
-    if (password.length < 6 || !/[A-Z]/.test(password)) {
-      setError('Le mot de passe doit contenir au moins 6 caractères et 1 majuscule');
-      return;
-    }
-  
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_APP_API_URL}/apiAdmin/auth/login`,
-        formData,
-        { withCredentials: true }
-      );
-  
-  
-      const { id_admin, nom_admin, token, telephone, poste, acces } = response.data;
-  
-      if (id_admin && nom_admin && token) {
-        console.log('id_admin:', id_admin, 'Nom Admin:', nom_admin, 'Token:', token, 'Accès:', acces);
-  
-        // Sauvegarde dans localStorage
-        localStorage.setItem('token', token);
-        localStorage.setItem(
-          'user',
-          JSON.stringify({ id_admin, nom_admin, telephone, poste, acces })
-        );
-        document.cookie = `token=${token}; Path=/; Secure; HttpOnly; SameSite=Strict`;
-  
-        // Passe directement les données de la réponse à login
-        login(response.data);
-        navigate('/Admin/chart');
-      } else {
-        setError('Les informations d\'utilisateur sont invalides.');
-      }
-    } catch (err: any) {
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_APP_API_URL}/apiAdmin/auth/login`,
+      formData,
+      { withCredentials: true }
+    );
+
+    const { id_admin, nom_admin, token, telephone, poste, acces, avatar } = response.data;
+
+    const userData = {
+      id_admin,
+      nom_admin,
+      telephone,
+      poste,
+      acces,
+      token,
+      avatar: avatar || '/profileFc.jpg' // Utilise l'avatar du serveur ou par défaut
+    };
+
+    // Sauvegarde complète dans localStorage
+    const expirationDate = new Date();
+    expirationDate.setHours(expirationDate.getHours() + 1);
+    
+    localStorage.setItem('user', JSON.stringify({
+      ...userData,
+      expirationTime: expirationDate.getTime()
+    }));
+
+    document.cookie = `token=${token}; expires=${expirationDate.toUTCString()}; Path=/; Secure; HttpOnly; SameSite=Strict`;
+
+    login(userData);
+    navigate('/Admin/chart');
+  } catch (err) {
       console.error('Erreur de connexion:', err);
       setError(err.response?.data?.message || 'Erreur de connexion.');
-    }
-  };
-  
-  
-
+      }
+};
   return (
     <>
       <Breadcrumb pageName="Authentification" />

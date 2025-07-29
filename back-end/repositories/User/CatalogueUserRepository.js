@@ -72,19 +72,7 @@ class CatalogueUserRepository {
 `);
             console.log('✅ Table session_formation  initialisée');
 
-            await db.query(`
-                CREATE TABLE IF NOT EXISTS seance (
-    id_seance INT AUTO_INCREMENT PRIMARY KEY,
-    heure_debut TIME NOT NULL,
-    heure_fin TIME NOT NULL,
-    pause_debut TIME,
-    pause_fin TIME,
-    id_session INT NOT NULL,
-    FOREIGN KEY (id_session) REFERENCES session_formation(id_session)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-`);
-            console.log('✅ Table seance initialisée');
-
+            
             
         } catch (error) {
             console.error('❌ Erreur initialisation tables:', error);

@@ -321,10 +321,7 @@ const Presentation: React.FC = () => {
     </div>
   </div>
 </div>
-<br/><br/><br/>
 
-<SoumettreCandidature/>
-          <br/><br/><br/>
           <ul className="mt-auto w-full w-screen relative left-1/2 right-1/2 mx-[-50vw]">
             <Footer/>
           </ul>

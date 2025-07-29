@@ -197,7 +197,7 @@ const SidebarSuperAdmin = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                                     fill=""
                                   />
                                 </svg>
-                                Demandes de formation
+                  Les demandes 
                               </NavLink>
                             </li>
               <li>
